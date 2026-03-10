@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from './api.js';
 import locations from './data/locations.json';
@@ -65,10 +65,121 @@ const meetupForm = reactive({
 
 const tradeDrafts = reactive({});
 
+const langOptions = [
+  { value: 'en', label: 'EN', flag: '🇬🇧' },
+  { value: 'de', label: 'DE', flag: '🇩🇪' },
+  { value: 'sr', label: 'SR', flag: '🇷🇸' }
+];
+const langDropdownOpen = ref(false);
+const currentLang = computed(() => langOptions.find(l => l.value === locale.value));
+
+function selectLang(value) {
+  locale.value = value;
+  langDropdownOpen.value = false;
+}
+
+function onLangClickOutside(e) {
+  if (!e.target.closest('.lang-dropdown')) {
+    langDropdownOpen.value = false;
+  }
+}
+
+// FIFA World Cup 2026 kick-off: June 11, 21:00 Europe/Berlin (CEST = UTC+2) → 19:00 UTC
+const KICKOFF = new Date('2026-06-11T19:00:00.000Z');
+
+const countdown = reactive({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: false });
+const localKickoffTime = KICKOFF.toLocaleString(undefined, {
+  weekday: 'long',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  timeZoneName: 'short'
+});
+
+let countdownInterval = null;
+
+function updateCountdown() {
+  const diff = KICKOFF - Date.now();
+  if (diff <= 0) {
+    countdown.expired = true;
+    countdown.days = countdown.hours = countdown.minutes = countdown.seconds = 0;
+    clearInterval(countdownInterval);
+    return;
+  }
+  countdown.days = Math.floor(diff / 86_400_000);
+  countdown.hours = Math.floor((diff % 86_400_000) / 3_600_000);
+  countdown.minutes = Math.floor((diff % 3_600_000) / 60_000);
+  countdown.seconds = Math.floor((diff % 60_000) / 1_000);
+}
+
 const isAuthenticated = computed(() => Boolean(currentUser.value));
 const searchCityOptions = computed(() => locations[searchForm.country] || []);
 const meetupFilterCityOptions = computed(() => locations[meetupFilterForm.country] || []);
 const meetupFormCityOptions = computed(() => locations[meetupForm.country] || []);
+
+// ── Predictions ──────────────────────────────────────────────────────────────
+const PREDICTION_GROUPS = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+const predictions = ref([]);
+const activePredictionGroup = ref('A');
+const predictionDrafts = reactive({});
+const predictionSaved = reactive({});
+
+const gamesByGroup = computed(() => {
+  const groups = {};
+  for (const game of predictions.value) {
+    if (!groups[game.group]) groups[game.group] = [];
+    groups[game.group].push(game);
+  }
+  return groups;
+});
+
+function initPredictionDrafts() {
+  for (const game of predictions.value) {
+    predictionDrafts[game.id] = {
+      home: game.prediction?.homeScore ?? '',
+      away: game.prediction?.awayScore ?? ''
+    };
+  }
+}
+
+function isGameLocked(game) {
+  return new Date(game.startsAt) <= new Date();
+}
+
+function formatGameDate(iso) {
+  return new Date(iso).toLocaleString(undefined, {
+    weekday: 'short', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+}
+
+async function fetchPredictions() {
+  const { data } = await api.get('/predictions/games');
+  predictions.value = data.games;
+  initPredictionDrafts();
+}
+
+async function savePrediction(gameId) {
+  loading.value = true;
+  setStatus();
+  const draft = predictionDrafts[gameId];
+
+  try {
+    await api.put(`/predictions/games/${gameId}`, {
+      homeScore: Number(draft.home),
+      awayScore: Number(draft.away)
+    });
+    predictionSaved[gameId] = true;
+    setTimeout(() => { predictionSaved[gameId] = false; }, 2500);
+    await fetchPredictions();
+  } catch (error) {
+    setStatus('', error.response?.data?.message || 'Could not save prediction.');
+  } finally {
+    loading.value = false;
+  }
+}
 
 function setStatus(nextMessage = '', nextError = '') {
   message.value = nextMessage;
@@ -235,6 +346,7 @@ async function handleLogin() {
     await fetchMe();
     await fetchTrades();
     await fetchMeetups();
+    await fetchPredictions();
     setStatus('Logged in successfully.');
     activeSection.value = 'search';
     loginForm.password = '';
@@ -251,6 +363,7 @@ async function handleLogout() {
   trades.value = [];
   searchResults.value = [];
   await fetchMeetups();
+  await fetchPredictions();
   activeSection.value = 'home';
   setStatus('Logged out.');
 }
@@ -408,7 +521,15 @@ async function toggleMeetupAttendance(meetup) {
   }
 }
 
+onUnmounted(() => {
+  clearInterval(countdownInterval);
+  document.removeEventListener('click', onLangClickOutside);
+});
+
 onMounted(async () => {
+  updateCountdown();
+  countdownInterval = setInterval(updateCountdown, 1000);
+  document.addEventListener('click', onLangClickOutside);
   const params = new URLSearchParams(window.location.search);
   const token = params.get('verify');
 
@@ -422,6 +543,7 @@ onMounted(async () => {
   await fetchMe();
   await fetchTrades();
   await fetchMeetups();
+  await fetchPredictions();
 });
 </script>
 
@@ -437,19 +559,28 @@ onMounted(async () => {
         <button type="button" @click="activeSection = 'home'">{{ t('navHome') }}</button>
         <button type="button" @click="activeSection = 'search'">{{ t('navSearch') }}</button>
         <button type="button" @click="activeSection = 'meetups'">{{ t('navMeetups') }}</button>
+        <button type="button" @click="activeSection = 'predictions'">Predictions</button>
         <button type="button" @click="activeSection = 'trades'">{{ t('navTrades') }}</button>
         <button type="button" @click="activeSection = 'account'">{{ t('navAccount') }}</button>
       </nav>
 
       <div class="toolbar">
-        <label class="language-picker">
-          <span>{{ t('language') }}</span>
-          <select v-model="locale">
-            <option value="en">EN</option>
-            <option value="de">DE</option>
-            <option value="sr">SR</option>
-          </select>
-        </label>
+        <div class="lang-dropdown" :class="{ open: langDropdownOpen }">
+          <button type="button" class="lang-trigger" @click.stop="langDropdownOpen = !langDropdownOpen">
+            <span>{{ currentLang.flag }} {{ currentLang.label }}</span>
+            <svg class="lang-chevron" viewBox="0 0 12 12" width="12" height="12" fill="none">
+              <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <ul v-if="langDropdownOpen" class="lang-menu">
+            <li v-for="lang in langOptions" :key="lang.value">
+              <button type="button" :class="{ selected: locale === lang.value }" @click="selectLang(lang.value)">
+                <span class="lang-flag">{{ lang.flag }}</span>
+                <span>{{ lang.label }}</span>
+              </button>
+            </li>
+          </ul>
+        </div>
 
         <button v-if="isAuthenticated" type="button" class="secondary" @click="handleLogout">
           {{ t('logout') }}
@@ -463,6 +594,35 @@ onMounted(async () => {
           <p class="eyebrow">FIFA WORLD CUP STICKER EXCHANGE</p>
           <h1>{{ t('heroTitle') }}</h1>
           <p>{{ t('heroBody') }}</p>
+        </div>
+
+        <div class="countdown-wrap">
+          <p class="countdown-label">
+            <template v-if="!countdown.expired">KICKOFF IN</template>
+            <template v-else>THE WORLD CUP HAS STARTED!</template>
+          </p>
+          <div v-if="!countdown.expired" class="countdown-tiles">
+            <div class="countdown-tile">
+              <span class="countdown-value">{{ String(countdown.days).padStart(2, '0') }}</span>
+              <span class="countdown-unit">days</span>
+            </div>
+            <span class="countdown-sep">:</span>
+            <div class="countdown-tile">
+              <span class="countdown-value">{{ String(countdown.hours).padStart(2, '0') }}</span>
+              <span class="countdown-unit">hrs</span>
+            </div>
+            <span class="countdown-sep">:</span>
+            <div class="countdown-tile">
+              <span class="countdown-value">{{ String(countdown.minutes).padStart(2, '0') }}</span>
+              <span class="countdown-unit">min</span>
+            </div>
+            <span class="countdown-sep">:</span>
+            <div class="countdown-tile">
+              <span class="countdown-value">{{ String(countdown.seconds).padStart(2, '0') }}</span>
+              <span class="countdown-unit">sec</span>
+            </div>
+          </div>
+          <p class="countdown-localtime">{{ localKickoffTime }}</p>
         </div>
 
         <div class="hero-grid">
@@ -687,6 +847,78 @@ onMounted(async () => {
         </div>
       </section>
 
+      <section v-if="activeSection === 'predictions'">
+        <article class="card">
+          <h2>Match Predictions</h2>
+          <p v-if="!isAuthenticated" style="margin:0">Login to submit your score predictions. All games are visible to everyone.</p>
+          <div class="group-tabs">
+            <button
+              v-for="group in PREDICTION_GROUPS"
+              :key="group"
+              type="button"
+              class="group-tab"
+              :class="{ active: activePredictionGroup === group }"
+              @click="activePredictionGroup = group"
+            >
+              <span class="group-tab-label">Group</span> {{ group }}
+            </button>
+          </div>
+        </article>
+
+        <div class="prediction-list">
+          <article
+            v-for="game in (gamesByGroup[activePredictionGroup] || [])"
+            :key="game.id"
+            class="card prediction-game"
+            :class="{ locked: isGameLocked(game) }"
+          >
+            <div class="prediction-game-meta">
+              <span class="game-match-num">Match {{ game.matchNumber }}</span>
+              <span class="game-datetime">{{ formatGameDate(game.startsAt) }}</span>
+              <span class="game-venue">{{ game.venue }}, {{ game.city }}</span>
+              <span v-if="isGameLocked(game)" class="pill muted">Locked</span>
+            </div>
+
+            <div class="prediction-matchup">
+              <span class="pred-team home">{{ game.homeTeam }}</span>
+              <div class="pred-scores">
+                <input
+                  v-model="predictionDrafts[game.id].home"
+                  type="number" min="0" max="20"
+                  class="score-input"
+                  :disabled="isGameLocked(game) || !isAuthenticated"
+                  placeholder="–"
+                />
+                <span class="pred-sep">:</span>
+                <input
+                  v-model="predictionDrafts[game.id].away"
+                  type="number" min="0" max="20"
+                  class="score-input"
+                  :disabled="isGameLocked(game) || !isAuthenticated"
+                  placeholder="–"
+                />
+              </div>
+              <span class="pred-team away">{{ game.awayTeam }}</span>
+            </div>
+
+            <div class="prediction-footer">
+              <span v-if="predictionSaved[game.id]" class="pred-saved">✓ Saved</span>
+              <button
+                v-if="!isGameLocked(game) && isAuthenticated"
+                type="button"
+                class="pred-save-btn"
+                :disabled="loading || predictionDrafts[game.id].home === '' || predictionDrafts[game.id].away === ''"
+                @click="savePrediction(game.id)"
+              >Save</button>
+            </div>
+          </article>
+
+          <article v-if="!(gamesByGroup[activePredictionGroup] || []).length" class="card">
+            <p>No games found for Group {{ activePredictionGroup }}.</p>
+          </article>
+        </div>
+      </section>
+
       <section v-if="activeSection === 'trades'" class="card stack">
         <h2>{{ t('tradesTitle') }}</h2>
         <div v-if="!trades.length">{{ t('noTrades') }}</div>
@@ -696,7 +928,7 @@ onMounted(async () => {
               <strong>
                 {{ Number(trade.target_user_id) === Number(currentUser?.id) ? t('incoming') : t('outgoing') }}
               </strong>
-              <span class="status">{{ trade.status }}</span>
+              <span class="status" :class="`status--${trade.status}`">{{ trade.status }}</span>
             </div>
             <p>{{ trade.requester_username }} to {{ trade.target_username }}</p>
             <p><strong>{{ t('neededStickers') }}:</strong> {{ trade.requested_stickers }}</p>

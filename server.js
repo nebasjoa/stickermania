@@ -3,11 +3,13 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import express from 'express';
 import cookieParser from 'cookie-parser';
-import { ensureSchema } from './server/db.js';
+import { ensureSchema, query } from './server/db.js';
+import { games as wcGames } from './server/data/games.js';
 import authRoutes from './server/routes/auth.js';
 import userRoutes from './server/routes/users.js';
 import tradeRoutes from './server/routes/trades.js';
 import meetupRoutes from './server/routes/meetups.js';
+import predictionRoutes from './server/routes/predictions.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,6 +25,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/trades', tradeRoutes);
 app.use('/api/meetups', meetupRoutes);
+app.use('/api/predictions', predictionRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true });
@@ -38,8 +41,19 @@ app.get('*', (req, res, next) => {
   return res.sendFile(path.join(distPath, 'index.html'));
 });
 
+async function seedGames() {
+  for (const game of wcGames) {
+    await query(
+      `INSERT IGNORE INTO wc_games (match_number, group_name, stage, home_team, away_team, starts_at, venue, city)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [game.matchNumber, game.group, game.stage || 'group', game.homeTeam, game.awayTeam, new Date(game.startsAt), game.venue, game.city]
+    );
+  }
+}
+
 async function bootstrap() {
   await ensureSchema();
+  await seedGames();
 
   app.listen(port, () => {
     console.log(`Stickermania listening on http://localhost:${port}`);
