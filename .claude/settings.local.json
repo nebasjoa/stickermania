@@ -17,7 +17,9 @@
       "WebFetch(domain:www.tournamentsoccer.us)",
       "WebFetch(domain:www.espn.com)",
       "WebFetch(domain:www.flashscore.com)",
-      "WebFetch(domain:www.aljazeera.com)"
+      "WebFetch(domain:www.aljazeera.com)",
+      "Bash(git add:*)",
+      "Bash(git push:*)"
     ]
   }
 }

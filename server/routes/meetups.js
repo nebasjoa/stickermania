@@ -3,6 +3,7 @@ import { query } from '../db.js';
 import { attachOptionalAuth, requireAuth } from '../auth.js';
 
 const router = express.Router();
+const MAX_MEETUPS_PER_USER = 3;
 
 router.get('/', attachOptionalAuth, async (req, res) => {
   const country = String(req.query.country || '').trim();
@@ -88,6 +89,15 @@ router.post('/', requireAuth, async (req, res) => {
   const startsAtDate = new Date(startsAt);
   if (Number.isNaN(startsAtDate.getTime())) {
     return res.status(400).json({ message: 'Invalid meetup start date.' });
+  }
+
+  const existingMeetups = await query(
+    'SELECT COUNT(*) AS meetup_count FROM meetups WHERE creator_user_id = ?',
+    [req.user.id]
+  );
+
+  if (Number(existingMeetups[0]?.meetup_count || 0) >= MAX_MEETUPS_PER_USER) {
+    return res.status(400).json({ message: `You can create up to ${MAX_MEETUPS_PER_USER} meetups.` });
   }
 
   await query(
