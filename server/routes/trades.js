@@ -1,6 +1,7 @@
 import express from 'express';
 import { requireAuth } from '../auth.js';
 import { query, runInTransaction } from '../db.js';
+import { sendTradeRequestEmail } from '../mailer.js';
 import { normalizeStickerNumbers } from '../utils.js';
 
 const router = express.Router();
@@ -76,7 +77,7 @@ router.post('/', requireAuth, async (req, res) => {
   }
 
   const targetUsers = await query(
-    'SELECT id, is_verified FROM users WHERE id = ? LIMIT 1',
+    'SELECT id, username, email, is_verified FROM users WHERE id = ? LIMIT 1',
     [Number(targetUserId)]
   );
 
@@ -100,6 +101,19 @@ router.post('/', requireAuth, async (req, res) => {
       trimmedLocationNote
     ]
   );
+
+  try {
+    await sendTradeRequestEmail({
+      email: targetUsers[0].email,
+      targetUsername: targetUsers[0].username,
+      requesterUsername: req.user.username,
+      requestedStickers: requested,
+      offeredStickers: offered,
+      tradeMethod: normalizedTradeMethod
+    });
+  } catch (error) {
+    console.error('[trades] Trade created but notification email failed:', error);
+  }
 
   return res.status(201).json({ message: 'Trade request sent.' });
 });

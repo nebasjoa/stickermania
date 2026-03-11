@@ -1,10 +1,13 @@
 <script setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import CountryLabel from '../components/CountryLabel.vue';
 import {
   isAuthenticated, loading, predictions, predictionDrafts, predictionSaved,
   activePredictionGroup, activeKnockoutStage, savePrediction
 } from '../store.js';
+
+const { t } = useI18n();
 
 const PREDICTION_GROUPS = ['A','B','C','D','E','F','G','H','I','J','K','L'];
 const KNOCKOUT_STAGES = [
@@ -35,6 +38,26 @@ const knockoutByStage = computed(() => {
   }
   return stages;
 });
+
+const scoredPredictions = computed(() =>
+  predictions.value.filter((game) => game.prediction?.points != null)
+);
+
+const totalPredictionPoints = computed(() =>
+  scoredPredictions.value.reduce((sum, game) => sum + Number(game.prediction?.points || 0), 0)
+);
+
+const exactPredictionCount = computed(() =>
+  scoredPredictions.value.filter((game) => Number(game.prediction?.points) === 3).length
+);
+
+const outcomePredictionCount = computed(() =>
+  scoredPredictions.value.filter((game) => Number(game.prediction?.points) === 1).length
+);
+
+const pendingPredictionCount = computed(() =>
+  predictions.value.filter((game) => game.prediction && game.prediction.points == null).length
+);
 
 function isGameLocked(game) {
   return new Date(game.startsAt) <= new Date();
@@ -88,6 +111,38 @@ function predictionActionLabel(game) {
           Knockout
         </button>
       </div>
+    </article>
+
+    <article class="card prediction-points-card">
+      <div class="prediction-points-head">
+        <div>
+          <h3>{{ t('predictionPointsTitle') }}</h3>
+          <p>{{ t('predictionPointsScored', { scored: scoredPredictions.length, pending: pendingPredictionCount }) }}</p>
+        </div>
+        <strong class="prediction-points-total">
+          {{ totalPredictionPoints }} {{ t('predictionPointsUnit', totalPredictionPoints) }}
+        </strong>
+      </div>
+      <div class="prediction-points-grid">
+        <div class="prediction-points-item">
+          <span class="prediction-points-value">{{ exactPredictionCount }}</span>
+          <span class="prediction-points-label">{{ t('predictionPointsExact') }}</span>
+        </div>
+        <div class="prediction-points-item">
+          <span class="prediction-points-value">{{ outcomePredictionCount }}</span>
+          <span class="prediction-points-label">{{ t('predictionPointsOutcome') }}</span>
+        </div>
+        <div class="prediction-points-item">
+          <span class="prediction-points-value">{{ pendingPredictionCount }}</span>
+          <span class="prediction-points-label">{{ t('predictionPointsPending') }}</span>
+        </div>
+      </div>
+      <p class="prediction-points-rules">{{ t('predictionPointsRulesTitle') }}</p>
+      <ul class="prediction-points-rules-list">
+        <li>{{ t('predictionPointsRuleExact') }}</li>
+        <li>{{ t('predictionPointsRuleOutcome') }}</li>
+        <li>{{ t('predictionPointsRuleMiss') }}</li>
+      </ul>
     </article>
 
     <div v-if="activePredictionGroup !== 'KO'" class="prediction-list">

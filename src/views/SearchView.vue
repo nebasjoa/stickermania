@@ -25,11 +25,11 @@ function collectorOffersLabel(user) {
 }
 
 function myNeedsLabel() {
-  return t('tradeUserNeeds', { username: currentUser.value?.username || t('navAccount') });
+  return t('tradeYouNeed');
 }
 
 function myOffersLabel() {
-  return t('tradeUserOffers', { username: currentUser.value?.username || t('navAccount') });
+  return t('tradeYouOffer');
 }
 
 watch(() => searchForm.country, (next, prev) => {

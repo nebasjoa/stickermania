@@ -95,7 +95,7 @@ router.get('/games', attachOptionalAuth, async (req, res) => {
   let userPredictions = [];
   if (req.user?.id) {
     userPredictions = await query(
-      'SELECT game_id, home_score, away_score FROM predictions WHERE user_id = ?',
+      'SELECT game_id, home_score, away_score, points FROM predictions WHERE user_id = ?',
       [req.user.id]
     );
   }
@@ -104,7 +104,8 @@ router.get('/games', attachOptionalAuth, async (req, res) => {
   for (const p of userPredictions) {
     predictionMap[Number(p.game_id)] = {
       homeScore: Number(p.home_score),
-      awayScore: Number(p.away_score)
+      awayScore: Number(p.away_score),
+      points: p.points != null ? Number(p.points) : null
     };
   }
 
