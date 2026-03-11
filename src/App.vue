@@ -88,6 +88,11 @@ onMounted(async () => {
       </nav>
 
       <div class="toolbar">
+        <div v-if="isAuthenticated" class="navbar-user">
+          <span class="navbar-user-label">{{ t('navSignedInAs') }}</span>
+          <strong class="navbar-user-name">{{ currentUser?.username }}</strong>
+        </div>
+
         <div class="lang-dropdown" :class="{ open: langDropdownOpen }">
           <button type="button" class="lang-trigger" @click.stop="langDropdownOpen = !langDropdownOpen">
             <span :class="`fi fi-${currentLang.fi}`"></span>
@@ -128,6 +133,10 @@ onMounted(async () => {
           <RouterLink to="/account" @click="closeDrawer">{{ t('navAccount') }}</RouterLink>
           <RouterLink v-if="isAdmin" to="/admin" @click="closeDrawer">Admin</RouterLink>
           <hr class="drawer-divider" />
+          <div v-if="isAuthenticated" class="drawer-user">
+            <span class="navbar-user-label">{{ t('navSignedInAs') }}</span>
+            <strong class="navbar-user-name">{{ currentUser?.username }}</strong>
+          </div>
           <div class="drawer-lang">
             <button
               v-for="lang in langOptions"

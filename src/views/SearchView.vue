@@ -75,6 +75,16 @@ function toggleTradeSticker(userId, field, sticker) {
   draft[field] = [...next].sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
 }
 
+const searchDisabledNote = computed(() => {
+  if (loading.value) {
+    return t('searchDisabledLoading');
+  }
+  if (!isAuthenticated.value) {
+    return t('searchDisabledAuth');
+  }
+  return '';
+});
+
 async function doSearch() {
   const found = await searchCollectors();
   if (!found && !searchResults.value.length) {
@@ -107,6 +117,7 @@ async function doSearch() {
         </div>
         <button type="submit" :disabled="loading || !isAuthenticated">{{ t('searchButton') }}</button>
       </form>
+      <small v-if="searchDisabledNote" class="search-disabled-note">{{ searchDisabledNote }}</small>
       <small>{{ t('searchHelp') }}</small>
     </article>
 
