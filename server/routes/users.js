@@ -5,6 +5,19 @@ import { normalizeStickerNumbers } from '../utils.js';
 
 const router = express.Router();
 
+// GET /api/users/recent
+// Returns the 8 most recently verified collectors.
+router.get('/recent', async (req, res) => {
+  const rows = await query(
+    `SELECT id, username, country, city, created_at
+     FROM users
+     WHERE is_verified = 1
+     ORDER BY created_at DESC
+     LIMIT 8`
+  );
+  return res.json({ users: rows });
+});
+
 router.get('/search', requireAuth, async (req, res) => {
   const stickerNumbers = normalizeStickerNumbers(req.query.numbers || '');
   const country = String(req.query.country || '').trim();

@@ -34,12 +34,34 @@ router.get('/games', attachOptionalAuth, async (req, res) => {
       id: Number(g.id),
       matchNumber: Number(g.match_number),
       group: g.group_name,
+      stage: g.stage,
       homeTeam: g.home_team,
       awayTeam: g.away_team,
       startsAt: g.starts_at,
       venue: g.venue,
       city: g.city,
       prediction: predictionMap[Number(g.id)] ?? null
+    }))
+  });
+});
+
+// GET /api/predictions/leaderboard
+// Returns top users ranked by number of submitted predictions.
+router.get('/leaderboard', async (req, res) => {
+  const rows = await query(
+    `SELECT u.username, u.country, u.city, COUNT(p.id) AS prediction_count
+     FROM users u
+     JOIN predictions p ON p.user_id = u.id
+     GROUP BY u.id, u.username, u.country, u.city
+     ORDER BY prediction_count DESC
+     LIMIT 10`
+  );
+  return res.json({
+    leaderboard: rows.map((r) => ({
+      username: r.username,
+      country: r.country,
+      city: r.city,
+      count: Number(r.prediction_count)
     }))
   });
 });

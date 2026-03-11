@@ -79,11 +79,11 @@ summary {
 
 button {
   border: none;
-  border-radius: var(--radius-pill);
+  border-radius: 5px;
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
   color: #ffffff;
   cursor: pointer;
-  padding: 0.7rem 1.4rem;
+  padding: 10px 15px;
   font-weight: 600;
   font-size: 0.9rem;
   letter-spacing: 0.01em;
@@ -134,8 +134,8 @@ textarea,
 select {
   width: 100%;
   border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 0.75rem 1rem;
+  border-radius: 5px;
+  padding: 8px;
   background: var(--surface);
   color: var(--text);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -431,6 +431,10 @@ small {
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
 }
 
+.home-meetups-section {
+  margin-top: 0.25rem;
+}
+
 .info-box {
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: var(--radius);
@@ -649,6 +653,15 @@ small {
 .search-fields {
   display: grid;
   gap: 0.75rem;
+}
+
+.search-row-collectors {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.search-fields-collectors {
+  grid-template-columns: minmax(0, 1.8fr) repeat(2, minmax(180px, 0.7fr));
+  align-items: end;
 }
 
 /* ── Notices ────────────────────────────────────────────── */
@@ -998,6 +1011,139 @@ small {
   color: var(--success-text);
 }
 
+.knockout-tab {
+  background: linear-gradient(135deg, #1e1b4b, #312e81);
+  border-color: #4f46e5;
+  color: #c7d2fe;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.knockout-tab:hover:not(:disabled) {
+  background: linear-gradient(135deg, #312e81, #4338ca);
+  border-color: #818cf8;
+  color: #e0e7ff;
+  box-shadow: 0 2px 12px rgba(99, 102, 241, 0.4);
+}
+
+.knockout-tab.active {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  border-color: #818cf8;
+  color: #ffffff;
+  box-shadow: 0 2px 12px rgba(124, 58, 237, 0.4);
+}
+
+.knockout-stage-nav {
+  padding: 1rem 1.25rem;
+}
+
+.knockout-stage-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.knockout-stage-tab {
+  background: var(--surface-muted);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.35rem 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.knockout-stage-tab:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: none;
+}
+
+.knockout-stage-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.knockout-stage-header {
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin: 1rem 0 0.25rem;
+}
+
+/* ── Home panels ─────────────────────────────────────────── */
+
+.home-panels-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.home-panel-empty {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: 0.25rem 0;
+}
+
+.home-panel-item {
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.home-panel-item:first-of-type {
+  border-top: none;
+}
+
+.home-panel-item-top {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.home-panel-item-top strong {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-panel-item-sub {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.home-panel-item-date {
+  margin: 0.1rem 0 0;
+  font-size: 0.78rem;
+  color: var(--text-subtle);
+}
+
+.home-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
 /* ── Responsive ─────────────────────────────────────────── */
 
 @media (max-width: 840px) {
@@ -1032,6 +1178,14 @@ small {
   }
 
   .search-row {
+    grid-template-columns: 1fr;
+  }
+
+  .search-fields-collectors {
+    grid-template-columns: 1fr;
+  }
+
+  .home-panels-grid {
     grid-template-columns: 1fr;
   }
 }

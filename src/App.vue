@@ -16,6 +16,8 @@ const currentUser = ref(null);
 const searchResults = ref([]);
 const trades = ref([]);
 const meetups = ref([]);
+const homeLeaderboard = ref([]);
+const homeRecentCollectors = ref([]);
 const verificationToken = ref('');
 
 const registerForm = reactive({
@@ -118,22 +120,51 @@ const isAuthenticated = computed(() => Boolean(currentUser.value));
 const searchCityOptions = computed(() => locations[searchForm.country] || []);
 const meetupFilterCityOptions = computed(() => locations[meetupFilterForm.country] || []);
 const meetupFormCityOptions = computed(() => locations[meetupForm.country] || []);
+const homeMeetups = computed(() => (
+  [...meetups.value]
+    .sort((left, right) => new Date(left.starts_at) - new Date(right.starts_at))
+    .slice(0, 3)
+));
 
 // ── Predictions ──────────────────────────────────────────────────────────────
 const PREDICTION_GROUPS = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+const KNOCKOUT_STAGES = [
+  { key: 'r32',   label: 'Round of 32' },
+  { key: 'r16',   label: 'Round of 16' },
+  { key: 'qf',    label: 'Quarter-Finals' },
+  { key: 'sf',    label: 'Semi-Finals' },
+  { key: 'third', label: '3rd Place' },
+  { key: 'final', label: 'Final' },
+];
 const predictions = ref([]);
 const activePredictionGroup = ref('A');
+const activeKnockoutStage = ref('r32');
 const predictionDrafts = reactive({});
 const predictionSaved = reactive({});
 
 const gamesByGroup = computed(() => {
   const groups = {};
   for (const game of predictions.value) {
+    if (game.stage !== 'group') continue;
     if (!groups[game.group]) groups[game.group] = [];
     groups[game.group].push(game);
   }
   return groups;
 });
+
+const knockoutByStage = computed(() => {
+  const stages = {};
+  for (const game of predictions.value) {
+    if (!game.stage || game.stage === 'group') continue;
+    if (!stages[game.stage]) stages[game.stage] = [];
+    stages[game.stage].push(game);
+  }
+  return stages;
+});
+
+const completedPredictionsCount = computed(
+  () => predictions.value.filter((game) => game.prediction).length
+);
 
 function initPredictionDrafts() {
   for (const game of predictions.value) {
@@ -153,6 +184,20 @@ function formatGameDate(iso) {
     weekday: 'short', month: 'short', day: 'numeric',
     hour: '2-digit', minute: '2-digit'
   });
+}
+
+function formatMeetupDate(iso) {
+  return new Date(iso).toLocaleString();
+}
+
+async function fetchHomeLeaderboard() {
+  const { data } = await api.get('/predictions/leaderboard');
+  homeLeaderboard.value = data.leaderboard;
+}
+
+async function fetchRecentCollectors() {
+  const { data } = await api.get('/users/recent');
+  homeRecentCollectors.value = data.users;
 }
 
 async function fetchPredictions() {
@@ -347,6 +392,8 @@ async function handleLogin() {
     await fetchTrades();
     await fetchMeetups();
     await fetchPredictions();
+    await fetchHomeLeaderboard();
+    await fetchRecentCollectors();
     setStatus('Logged in successfully.');
     activeSection.value = 'search';
     loginForm.password = '';
@@ -364,6 +411,8 @@ async function handleLogout() {
   searchResults.value = [];
   await fetchMeetups();
   await fetchPredictions();
+  await fetchHomeLeaderboard();
+  await fetchRecentCollectors();
   activeSection.value = 'home';
   setStatus('Logged out.');
 }
@@ -544,6 +593,8 @@ onMounted(async () => {
   await fetchTrades();
   await fetchMeetups();
   await fetchPredictions();
+  await fetchHomeLeaderboard();
+  await fetchRecentCollectors();
 });
 </script>
 
@@ -552,7 +603,6 @@ onMounted(async () => {
     <header class="navbar">
       <div>
         <div class="brand">{{ t('appName') }}</div>
-        <p class="tagline">{{ t('tagline') }}</p>
       </div>
 
       <nav class="nav-links">
@@ -589,53 +639,112 @@ onMounted(async () => {
     </header>
 
     <main class="main-content">
-      <section v-if="activeSection === 'home'" class="hero card">
-        <div>
-          <p class="eyebrow">FIFA WORLD CUP STICKER EXCHANGE</p>
-          <h1>{{ t('heroTitle') }}</h1>
-          <p>{{ t('heroBody') }}</p>
-        </div>
+      <template v-if="activeSection === 'home'">
+        <section class="hero card">
+          <div>
+            <p class="eyebrow">{{ t('heroEyebrow') }}</p>
+            <h1>{{ t('heroTitle') }}</h1>
+            <p>{{ t('heroBody') }}</p>
+          </div>
 
-        <div class="countdown-wrap">
-          <p class="countdown-label">
-            <template v-if="!countdown.expired">KICKOFF IN</template>
-            <template v-else>THE WORLD CUP HAS STARTED!</template>
-          </p>
-          <div v-if="!countdown.expired" class="countdown-tiles">
-            <div class="countdown-tile">
-              <span class="countdown-value">{{ String(countdown.days).padStart(2, '0') }}</span>
-              <span class="countdown-unit">days</span>
+          <div class="countdown-wrap">
+            <p class="countdown-label">
+              <template v-if="!countdown.expired">KICKOFF IN</template>
+              <template v-else>THE WORLD CUP HAS STARTED!</template>
+            </p>
+            <div v-if="!countdown.expired" class="countdown-tiles">
+              <div class="countdown-tile">
+                <span class="countdown-value">{{ String(countdown.days).padStart(2, '0') }}</span>
+                <span class="countdown-unit">days</span>
+              </div>
+              <span class="countdown-sep">:</span>
+              <div class="countdown-tile">
+                <span class="countdown-value">{{ String(countdown.hours).padStart(2, '0') }}</span>
+                <span class="countdown-unit">hrs</span>
+              </div>
+              <span class="countdown-sep">:</span>
+              <div class="countdown-tile">
+                <span class="countdown-value">{{ String(countdown.minutes).padStart(2, '0') }}</span>
+                <span class="countdown-unit">min</span>
+              </div>
+              <span class="countdown-sep">:</span>
+              <div class="countdown-tile">
+                <span class="countdown-value">{{ String(countdown.seconds).padStart(2, '0') }}</span>
+                <span class="countdown-unit">sec</span>
+              </div>
             </div>
-            <span class="countdown-sep">:</span>
-            <div class="countdown-tile">
-              <span class="countdown-value">{{ String(countdown.hours).padStart(2, '0') }}</span>
-              <span class="countdown-unit">hrs</span>
-            </div>
-            <span class="countdown-sep">:</span>
-            <div class="countdown-tile">
-              <span class="countdown-value">{{ String(countdown.minutes).padStart(2, '0') }}</span>
-              <span class="countdown-unit">min</span>
-            </div>
-            <span class="countdown-sep">:</span>
-            <div class="countdown-tile">
-              <span class="countdown-value">{{ String(countdown.seconds).padStart(2, '0') }}</span>
-              <span class="countdown-unit">sec</span>
-            </div>
+            <p class="countdown-localtime">{{ localKickoffTime }}</p>
           </div>
-          <p class="countdown-localtime">{{ localKickoffTime }}</p>
-        </div>
 
-        <div class="hero-grid">
-          <div class="info-box">
-            <strong>{{ t('searchTitle') }}</strong>
-            <p>{{ t('searchHelp') }}</p>
+          <div class="hero-grid">
+            <div class="info-box">
+              <strong>{{ t('searchTitle') }}</strong>
+              <p>{{ t('searchHelp') }}</p>
+            </div>
+            <div class="info-box">
+              <strong>{{ t('meetupsTitle') }}</strong>
+              <p>{{ t('meetupHelp') }}</p>
+            </div>
           </div>
-          <div class="info-box">
-            <strong>{{ t('meetupsTitle') }}</strong>
-            <p>{{ t('meetupHelp') }}</p>
-          </div>
+        </section>
+
+        <div class="home-panels-grid">
+          <section class="card stack">
+            <div class="card-top">
+              <div>
+                <p class="eyebrow">{{ t('navMeetups') }}</p>
+                <h2>{{ t('meetupBrowseTitle') }}</h2>
+              </div>
+              <button type="button" class="secondary" @click="activeSection = 'meetups'">{{ t('navMeetups') }}</button>
+            </div>
+            <div v-if="!homeMeetups.length" class="home-panel-empty">{{ t('meetupEmpty') }}</div>
+            <article v-for="meetup in homeMeetups" :key="`home-meetup-${meetup.id}`" class="home-panel-item">
+              <div class="home-panel-item-top">
+                <strong>{{ meetup.title }}</strong>
+                <span class="pill">{{ meetup.attendee_count }} going</span>
+              </div>
+              <p class="home-panel-item-sub">{{ meetup.city }}, {{ meetup.country }}</p>
+              <p class="home-panel-item-date">{{ formatMeetupDate(meetup.starts_at) }}</p>
+            </article>
+          </section>
+
+          <section class="card stack">
+            <div class="card-top">
+              <div>
+                <p class="eyebrow">Predictions</p>
+                <h2>Top Predictors</h2>
+              </div>
+              <button type="button" class="secondary" @click="activeSection = 'predictions'">Predict</button>
+            </div>
+            <div v-if="!homeLeaderboard.length" class="home-panel-empty">No predictions yet.</div>
+            <article v-for="(entry, index) in homeLeaderboard" :key="`lb-${entry.username}`" class="home-panel-item">
+              <div class="home-panel-item-top">
+                <span class="home-rank">{{ index + 1 }}</span>
+                <strong>{{ entry.username }}</strong>
+                <span class="pill">{{ entry.count }} / 72</span>
+              </div>
+              <p class="home-panel-item-sub">{{ [entry.city, entry.country].filter(Boolean).join(', ') || '—' }}</p>
+            </article>
+          </section>
+
+          <section class="card stack">
+            <div class="card-top">
+              <div>
+                <p class="eyebrow">Community</p>
+                <h2>New Collectors</h2>
+              </div>
+              <button type="button" class="secondary" @click="activeSection = 'search'">{{ t('navSearch') }}</button>
+            </div>
+            <div v-if="!homeRecentCollectors.length" class="home-panel-empty">No collectors yet.</div>
+            <article v-for="collector in homeRecentCollectors" :key="`collector-${collector.id}`" class="home-panel-item">
+              <div class="home-panel-item-top">
+                <strong>{{ collector.username }}</strong>
+              </div>
+              <p class="home-panel-item-sub">{{ [collector.city, collector.country].filter(Boolean).join(', ') || '—' }}</p>
+            </article>
+          </section>
         </div>
-      </section>
+      </template>
 
       <section v-if="message" class="notice success">{{ message }}</section>
       <section v-if="errorMessage" class="notice error">{{ errorMessage }}</section>
@@ -716,8 +825,8 @@ onMounted(async () => {
       <section v-if="activeSection === 'search'" class="stack">
         <article class="card">
           <h2>{{ t('searchTitle') }}</h2>
-          <form class="search-row" @submit.prevent="searchCollectors">
-            <div class="search-fields">
+          <form class="search-row search-row-collectors" @submit.prevent="searchCollectors">
+            <div class="search-fields search-fields-collectors">
               <input
                 v-model="searchForm.numbers"
                 :placeholder="t('searchPlaceholder')"
@@ -823,7 +932,7 @@ onMounted(async () => {
                 <h3>{{ meetup.title }}</h3>
                 <p>{{ meetup.city }}, {{ meetup.country }}</p>
               </div>
-              <span class="status">{{ new Date(meetup.starts_at).toLocaleString() }}</span>
+              <span class="status">{{ formatMeetupDate(meetup.starts_at) }}</span>
             </div>
             <p>{{ meetup.description }}</p>
             <div class="meetup-meta">
@@ -862,10 +971,19 @@ onMounted(async () => {
             >
               <span class="group-tab-label">Group</span> {{ group }}
             </button>
+            <button
+              type="button"
+              class="group-tab knockout-tab"
+              :class="{ active: activePredictionGroup === 'KO' }"
+              @click="activePredictionGroup = 'KO'"
+            >
+              Knockout
+            </button>
           </div>
         </article>
 
-        <div class="prediction-list">
+        <!-- Group stage games -->
+        <div v-if="activePredictionGroup !== 'KO'" class="prediction-list">
           <article
             v-for="game in (gamesByGroup[activePredictionGroup] || [])"
             :key="game.id"
@@ -917,6 +1035,80 @@ onMounted(async () => {
             <p>No games found for Group {{ activePredictionGroup }}.</p>
           </article>
         </div>
+
+        <!-- Knockout phase -->
+        <div v-else class="prediction-list">
+          <article class="card knockout-stage-nav">
+            <div class="knockout-stage-tabs">
+              <button
+                v-for="stage in KNOCKOUT_STAGES"
+                :key="stage.key"
+                type="button"
+                class="knockout-stage-tab"
+                :class="{ active: activeKnockoutStage === stage.key }"
+                @click="activeKnockoutStage = stage.key"
+              >
+                {{ stage.label }}
+              </button>
+            </div>
+          </article>
+
+          <template v-for="stage in KNOCKOUT_STAGES" :key="stage.key">
+            <template v-if="activeKnockoutStage === stage.key">
+              <h3 class="knockout-stage-header">{{ stage.label }}</h3>
+              <article
+                v-for="game in (knockoutByStage[stage.key] || [])"
+                :key="game.id"
+                class="card prediction-game"
+                :class="{ locked: isGameLocked(game) }"
+              >
+                <div class="prediction-game-meta">
+                  <span class="game-match-num">Match {{ game.matchNumber }}</span>
+                  <span class="game-datetime">{{ formatGameDate(game.startsAt) }}</span>
+                  <span class="game-venue">{{ game.venue }}, {{ game.city }}</span>
+                  <span v-if="isGameLocked(game)" class="pill muted">Locked</span>
+                </div>
+
+                <div class="prediction-matchup">
+                  <span class="pred-team home">{{ game.homeTeam }}</span>
+                  <div class="pred-scores">
+                    <input
+                      v-model="predictionDrafts[game.id].home"
+                      type="number" min="0" max="20"
+                      class="score-input"
+                      :disabled="isGameLocked(game) || !isAuthenticated"
+                      placeholder="–"
+                    />
+                    <span class="pred-sep">:</span>
+                    <input
+                      v-model="predictionDrafts[game.id].away"
+                      type="number" min="0" max="20"
+                      class="score-input"
+                      :disabled="isGameLocked(game) || !isAuthenticated"
+                      placeholder="–"
+                    />
+                  </div>
+                  <span class="pred-team away">{{ game.awayTeam }}</span>
+                </div>
+
+                <div class="prediction-footer">
+                  <span v-if="predictionSaved[game.id]" class="pred-saved">✓ Saved</span>
+                  <button
+                    v-if="!isGameLocked(game) && isAuthenticated"
+                    type="button"
+                    class="pred-save-btn"
+                    :disabled="loading || predictionDrafts[game.id].home === '' || predictionDrafts[game.id].away === ''"
+                    @click="savePrediction(game.id)"
+                  >Save</button>
+                </div>
+              </article>
+
+              <article v-if="!(knockoutByStage[stage.key] || []).length" class="card">
+                <p>No games found for this stage.</p>
+              </article>
+            </template>
+          </template>
+        </div>
       </section>
 
       <section v-if="activeSection === 'trades'" class="card stack">
@@ -951,6 +1143,7 @@ onMounted(async () => {
 
       <section v-if="activeSection === 'account' && isAuthenticated" class="card">
         <h2>{{ t('profileTitle') }}</h2>
+        <p>{{ t('predictionDone') }}: {{ completedPredictionsCount }} / {{ predictions.length }}</p>
         <form class="stack" @submit.prevent="saveProfile">
           <input v-model="profileForm.country" :placeholder="t('country')" />
           <input v-model="profileForm.city" :placeholder="t('city')" />
