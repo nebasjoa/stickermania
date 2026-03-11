@@ -12,6 +12,11 @@ router.get('/', requireAuth, async (req, res) => {
        tr.requested_stickers,
        tr.offered_stickers,
        tr.trade_method,
+       tr.phone_number,
+       tr.requester_full_name,
+       tr.postal_address,
+       tr.recipient_full_name,
+       tr.recipient_postal_address,
        tr.location_note,
        tr.status,
        tr.created_at,
@@ -36,14 +41,34 @@ router.post('/', requireAuth, async (req, res) => {
     requestedStickers = '',
     offeredStickers = '',
     tradeMethod = 'in_person',
+    phoneNumber = '',
+    fullName = '',
+    postalAddress = '',
     locationNote = ''
   } = req.body;
 
   const requested = normalizeStickerNumbers(requestedStickers);
   const offered = normalizeStickerNumbers(offeredStickers);
+  const normalizedTradeMethod = tradeMethod === 'post' ? 'post' : 'in_person';
+  const trimmedPhoneNumber = String(phoneNumber || '').trim();
+  const trimmedFullName = String(fullName || '').trim();
+  const trimmedPostalAddress = String(postalAddress || '').trim();
+  const trimmedLocationNote = String(locationNote || '').trim();
 
   if (!targetUserId || !requested.length || !offered.length) {
     return res.status(400).json({ message: 'Target user, requested stickers and offered stickers are required.' });
+  }
+
+  if (!trimmedPhoneNumber) {
+    return res.status(400).json({ message: 'Phone number is required.' });
+  }
+
+  if (normalizedTradeMethod === 'post' && !trimmedFullName) {
+    return res.status(400).json({ message: 'Full name is required for postal trades.' });
+  }
+
+  if (normalizedTradeMethod === 'post' && !trimmedPostalAddress) {
+    return res.status(400).json({ message: 'Postal address is required for postal trades.' });
   }
 
   if (Number(targetUserId) === Number(req.user.id)) {
@@ -61,15 +86,18 @@ router.post('/', requireAuth, async (req, res) => {
 
   await query(
     `INSERT INTO trade_requests
-       (requester_user_id, target_user_id, requested_stickers, offered_stickers, trade_method, location_note)
-     VALUES (?, ?, ?, ?, ?, ?)`,
+       (requester_user_id, target_user_id, requested_stickers, offered_stickers, trade_method, phone_number, requester_full_name, postal_address, location_note)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       req.user.id,
       Number(targetUserId),
       requested.join(','),
       offered.join(','),
-      tradeMethod === 'post' ? 'post' : 'in_person',
-      locationNote.trim()
+      normalizedTradeMethod,
+      trimmedPhoneNumber,
+      normalizedTradeMethod === 'post' ? trimmedFullName : '',
+      normalizedTradeMethod === 'post' ? trimmedPostalAddress : '',
+      trimmedLocationNote
     ]
   );
 
@@ -77,7 +105,7 @@ router.post('/', requireAuth, async (req, res) => {
 });
 
 router.put('/:id/status', requireAuth, async (req, res) => {
-  const { status } = req.body;
+  const { status, recipientFullName = '', recipientPostalAddress = '' } = req.body;
 
   if (!['accepted', 'declined'].includes(status)) {
     return res.status(400).json({ message: 'Invalid trade status.' });
@@ -90,6 +118,7 @@ router.put('/:id/status', requireAuth, async (req, res) => {
        target_user_id,
        requested_stickers,
        offered_stickers,
+       trade_method,
        status
      FROM trade_requests
      WHERE id = ?
@@ -109,8 +138,27 @@ router.put('/:id/status', requireAuth, async (req, res) => {
     return res.status(409).json({ message: 'This trade request has already been processed.' });
   }
 
+  const trimmedRecipientFullName = String(recipientFullName || '').trim();
+  const trimmedRecipientPostalAddress = String(recipientPostalAddress || '').trim();
+
+  if (status === 'accepted' && trades[0].trade_method === 'post' && !trimmedRecipientFullName) {
+    return res.status(400).json({ message: 'Recipient full name is required for postal trades.' });
+  }
+
+  if (status === 'accepted' && trades[0].trade_method === 'post' && !trimmedRecipientPostalAddress) {
+    return res.status(400).json({ message: 'Recipient postal address is required for postal trades.' });
+  }
+
   await runInTransaction(async (connection) => {
-    await connection.query('UPDATE trade_requests SET status = ? WHERE id = ?', [status, req.params.id]);
+    await connection.query(
+      'UPDATE trade_requests SET status = ?, recipient_full_name = ?, recipient_postal_address = ? WHERE id = ?',
+      [
+        status,
+        status === 'accepted' && trades[0].trade_method === 'post' ? trimmedRecipientFullName : '',
+        status === 'accepted' && trades[0].trade_method === 'post' ? trimmedRecipientPostalAddress : '',
+        req.params.id
+      ]
+    );
 
     if (status !== 'accepted') {
       return;
@@ -147,6 +195,41 @@ router.put('/:id/status', requireAuth, async (req, res) => {
       ? 'Trade request accepted and both collections were updated.'
       : 'Trade request declined.'
   });
+});
+
+router.delete('/:id', requireAuth, async (req, res) => {
+  const trades = await query(
+    `SELECT
+       id,
+       requester_user_id,
+       target_user_id,
+       status
+     FROM trade_requests
+     WHERE id = ?
+     LIMIT 1`,
+    [req.params.id]
+  );
+
+  if (!trades.length) {
+    return res.status(404).json({ message: 'Trade request not found.' });
+  }
+
+  const trade = trades[0];
+  const isParticipant =
+    Number(trade.requester_user_id) === Number(req.user.id) ||
+    Number(trade.target_user_id) === Number(req.user.id);
+
+  if (!isParticipant) {
+    return res.status(403).json({ message: 'You cannot remove this trade request.' });
+  }
+
+  if (trade.status !== 'declined') {
+    return res.status(409).json({ message: 'Only declined trade requests can be removed.' });
+  }
+
+  await query('DELETE FROM trade_requests WHERE id = ?', [req.params.id]);
+
+  return res.json({ message: 'Declined trade request removed.' });
 });
 
 export default router;

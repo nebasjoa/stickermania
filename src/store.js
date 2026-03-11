@@ -19,6 +19,7 @@ export const predictions = ref([]);
 export const predictionDrafts = reactive({});
 export const predictionSaved = reactive({});
 export const tradeDrafts = reactive({});
+export const tradeApprovalDrafts = reactive({});
 export const verificationToken = ref('');
 
 export const registerForm = reactive({
@@ -95,10 +96,26 @@ export function initPredictionDrafts() {
 export function getTradeDraft(userId) {
   if (!tradeDrafts[userId]) {
     tradeDrafts[userId] = {
-      requestedStickers: '', offeredStickers: '', tradeMethod: 'in_person', locationNote: ''
+      requestedStickers: [],
+      offeredStickers: [],
+      tradeMethod: 'in_person',
+      phoneNumber: '',
+      fullName: '',
+      postalAddress: '',
+      locationNote: ''
     };
   }
   return tradeDrafts[userId];
+}
+
+export function getTradeApprovalDraft(tradeId) {
+  if (!tradeApprovalDrafts[tradeId]) {
+    tradeApprovalDrafts[tradeId] = {
+      recipientFullName: '',
+      recipientPostalAddress: ''
+    };
+  }
+  return tradeApprovalDrafts[tradeId];
 }
 
 // ── API ───────────────────────────────────────────────────────────────────────
@@ -268,11 +285,20 @@ export async function sendTradeRequest(targetUserId) {
       requestedStickers: draft.requestedStickers,
       offeredStickers: draft.offeredStickers,
       tradeMethod: draft.tradeMethod,
+      phoneNumber: draft.phoneNumber,
+      fullName: draft.fullName,
+      postalAddress: draft.postalAddress,
       locationNote: draft.locationNote
     });
     setStatus(data.message);
     tradeDrafts[targetUserId] = {
-      requestedStickers: '', offeredStickers: '', tradeMethod: 'in_person', locationNote: ''
+      requestedStickers: [],
+      offeredStickers: [],
+      tradeMethod: 'in_person',
+      phoneNumber: '',
+      fullName: '',
+      postalAddress: '',
+      locationNote: ''
     };
     await fetchTrades();
   } catch (error) {
@@ -282,16 +308,36 @@ export async function sendTradeRequest(targetUserId) {
   }
 }
 
-export async function updateTradeStatus(id, status) {
+export async function updateTradeStatus(id, status, options = {}) {
   loading.value = true;
   setStatus();
   try {
-    const { data } = await api.put(`/trades/${id}/status`, { status });
+    const { data } = await api.put(`/trades/${id}/status`, {
+      status,
+      recipientFullName: options.recipientFullName || '',
+      recipientPostalAddress: options.recipientPostalAddress || ''
+    });
     setStatus(data.message);
+    delete tradeApprovalDrafts[id];
     await fetchTrades();
     await fetchMe();
   } catch (error) {
     setStatus('', error.response?.data?.message || 'Could not update trade request.');
+  } finally {
+    loading.value = false;
+  }
+}
+
+export async function deleteTrade(id) {
+  loading.value = true;
+  setStatus();
+  try {
+    const { data } = await api.delete(`/trades/${id}`);
+    setStatus(data.message);
+    delete tradeApprovalDrafts[id];
+    await fetchTrades();
+  } catch (error) {
+    setStatus('', error.response?.data?.message || 'Could not remove trade request.');
   } finally {
     loading.value = false;
   }

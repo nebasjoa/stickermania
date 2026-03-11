@@ -37,6 +37,11 @@ CREATE TABLE IF NOT EXISTS trade_requests (
   requested_stickers TEXT NOT NULL,
   offered_stickers TEXT NOT NULL,
   trade_method ENUM('in_person', 'post') NOT NULL,
+  phone_number VARCHAR(80) NOT NULL DEFAULT '',
+  requester_full_name VARCHAR(160) NOT NULL DEFAULT '',
+  postal_address VARCHAR(255) NOT NULL DEFAULT '',
+  recipient_full_name VARCHAR(160) NOT NULL DEFAULT '',
+  recipient_postal_address VARCHAR(255) NOT NULL DEFAULT '',
   location_note VARCHAR(255) DEFAULT '',
   status ENUM('pending', 'accepted', 'declined') NOT NULL DEFAULT 'pending',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -97,6 +102,11 @@ CREATE TABLE IF NOT EXISTS predictions (
 );
 
 ALTER TABLE predictions ADD COLUMN IF NOT EXISTS points TINYINT UNSIGNED NULL;
+ALTER TABLE trade_requests ADD COLUMN IF NOT EXISTS phone_number VARCHAR(80) NOT NULL DEFAULT '';
+ALTER TABLE trade_requests ADD COLUMN IF NOT EXISTS requester_full_name VARCHAR(160) NOT NULL DEFAULT '';
+ALTER TABLE trade_requests ADD COLUMN IF NOT EXISTS postal_address VARCHAR(255) NOT NULL DEFAULT '';
+ALTER TABLE trade_requests ADD COLUMN IF NOT EXISTS recipient_full_name VARCHAR(160) NOT NULL DEFAULT '';
+ALTER TABLE trade_requests ADD COLUMN IF NOT EXISTS recipient_postal_address VARCHAR(255) NOT NULL DEFAULT '';
 
 CREATE TABLE IF NOT EXISTS meetup_attendees (
   id INT PRIMARY KEY AUTO_INCREMENT,

@@ -14,3 +14,7 @@ export function normalizeStickerNumbers(input) {
       .filter(Boolean)
   )];
 }
+
+export function sortStickerNumbers(numbers) {
+  return [...numbers].sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+}

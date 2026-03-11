@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import AppFooter from './components/AppFooter.vue';
 import {
   currentUser, errorMessage, isAdmin, message,
   fetchGroupStandings, fetchHomeLeaderboard, fetchMe, fetchMeetups, fetchPredictions,
@@ -149,9 +150,6 @@ onMounted(async () => {
       <RouterView />
     </main>
 
-    <footer class="footer">
-      <span>{{ t('footer') }}</span>
-      <span v-if="currentUser">{{ currentUser.username }}</span>
-    </footer>
+    <AppFooter />
   </div>
 </template>

@@ -5,7 +5,7 @@ import locations from '../data/locations.json';
 import CountrySelect from '../components/CountrySelect.vue';
 import LocationLabel from '../components/LocationLabel.vue';
 import {
-  isAuthenticated, loading, searchForm, searchResults,
+  currentUser, isAuthenticated, loading, searchForm, searchResults,
   getTradeDraft, searchCollectors, sendTradeRequest, setStatus
 } from '../store.js';
 
@@ -13,10 +13,67 @@ const { t } = useI18n();
 
 const countryOptions = Object.keys(locations);
 const searchCityOptions = computed(() => locations[searchForm.country] || []);
+const currentUserNeeds = computed(() => currentUser.value?.needs || []);
+const currentUserOffers = computed(() => currentUser.value?.offers || []);
+
+function collectorNeedsLabel(user) {
+  return t('tradeUserNeeds', { username: user.username });
+}
+
+function collectorOffersLabel(user) {
+  return t('tradeUserOffers', { username: user.username });
+}
+
+function myNeedsLabel() {
+  return t('tradeUserNeeds', { username: currentUser.value?.username || t('navAccount') });
+}
+
+function myOffersLabel() {
+  return t('tradeUserOffers', { username: currentUser.value?.username || t('navAccount') });
+}
 
 watch(() => searchForm.country, (next, prev) => {
   if (next !== prev) searchForm.city = '';
 });
+
+function isStickerTradeMatch(sticker, source) {
+  return source === 'request'
+    ? currentUserNeeds.value.includes(sticker)
+    : currentUserOffers.value.includes(sticker);
+}
+
+function requestedStickerOptions(user) {
+  return user.offers.filter((sticker) => isStickerTradeMatch(sticker, 'request'));
+}
+
+function offeredStickerOptions(user) {
+  return user.needs.filter((sticker) => isStickerTradeMatch(sticker, 'offer'));
+}
+
+function isTradeStickerSelected(userId, field, sticker) {
+  return getTradeDraft(userId)[field].includes(sticker);
+}
+
+function isTradeDraftReady(userId) {
+  const draft = getTradeDraft(userId);
+  return Boolean(
+    draft.requestedStickers.length &&
+    draft.offeredStickers.length &&
+    draft.phoneNumber.trim() &&
+    (draft.tradeMethod !== 'post' || (draft.fullName.trim() && draft.postalAddress.trim()))
+  );
+}
+
+function toggleTradeSticker(userId, field, sticker) {
+  const draft = getTradeDraft(userId);
+  const next = new Set(draft[field]);
+  if (next.has(sticker)) {
+    next.delete(sticker);
+  } else {
+    next.add(sticker);
+  }
+  draft[field] = [...next].sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+}
 
 async function doSearch() {
   const found = await searchCollectors();
@@ -66,14 +123,14 @@ async function doSearch() {
         </div>
 
         <div class="sticker-section">
-          <strong>{{ t('neededStickers') }}:</strong>
+          <strong>{{ collectorNeedsLabel(user) }}:</strong>
           <span v-if="user.needs.length" class="sticker-list">
             <span v-for="n in user.needs" :key="n" class="sticker-chip need">{{ n }}</span>
           </span>
           <span v-else class="text-muted">-</span>
         </div>
         <div class="sticker-section">
-          <strong>{{ t('offeredStickers') }}:</strong>
+          <strong>{{ collectorOffersLabel(user) }}:</strong>
           <span v-if="user.offers.length" class="sticker-list">
             <span v-for="n in user.offers" :key="n" class="sticker-chip offer">{{ n }}</span>
           </span>
@@ -81,14 +138,57 @@ async function doSearch() {
         </div>
 
         <form class="stack compact" @submit.prevent="sendTradeRequest(user.id)">
-          <input v-model="getTradeDraft(user.id).requestedStickers" :placeholder="t('neededStickers')" />
-          <input v-model="getTradeDraft(user.id).offeredStickers" :placeholder="t('offeredStickers')" />
+          <div class="trade-sticker-picker">
+            <strong>{{ myNeedsLabel() }}:</strong>
+            <span v-if="requestedStickerOptions(user).length" class="trade-sticker-list">
+              <button
+                v-for="sticker in requestedStickerOptions(user)"
+                :key="`trade-request-${user.id}-${sticker}`"
+                type="button"
+                class="trade-sticker-chip trade-sticker-chip--need is-match"
+                :class="{ 'is-selected': isTradeStickerSelected(user.id, 'requestedStickers', sticker) }"
+                @click="toggleTradeSticker(user.id, 'requestedStickers', sticker)"
+              >{{ sticker }}</button>
+            </span>
+            <span v-else class="text-muted">-</span>
+          </div>
+          <div class="trade-sticker-picker">
+            <strong>{{ myOffersLabel() }}:</strong>
+            <span v-if="offeredStickerOptions(user).length" class="trade-sticker-list">
+              <button
+                v-for="sticker in offeredStickerOptions(user)"
+                :key="`trade-offer-${user.id}-${sticker}`"
+                type="button"
+                class="trade-sticker-chip trade-sticker-chip--offer is-match"
+                :class="{ 'is-selected': isTradeStickerSelected(user.id, 'offeredStickers', sticker) }"
+                @click="toggleTradeSticker(user.id, 'offeredStickers', sticker)"
+              >{{ sticker }}</button>
+            </span>
+            <span v-else class="text-muted">-</span>
+          </div>
           <select v-model="getTradeDraft(user.id).tradeMethod">
             <option value="in_person">{{ t('inPerson') }}</option>
             <option value="post">{{ t('byPost') }}</option>
           </select>
+          <input
+            v-model="getTradeDraft(user.id).phoneNumber"
+            :placeholder="t('phoneNumber')"
+          />
+          <input
+            v-if="getTradeDraft(user.id).tradeMethod === 'post'"
+            v-model="getTradeDraft(user.id).fullName"
+            :placeholder="t('fullName')"
+          />
+          <input
+            v-if="getTradeDraft(user.id).tradeMethod === 'post'"
+            v-model="getTradeDraft(user.id).postalAddress"
+            :placeholder="t('postalAddress')"
+          />
           <input v-model="getTradeDraft(user.id).locationNote" :placeholder="t('locationNote')" />
-          <button type="submit" :disabled="loading">{{ t('sendTrade') }}</button>
+          <button
+            type="submit"
+            :disabled="loading || !isTradeDraftReady(user.id)"
+          >{{ t('sendTrade') }}</button>
         </form>
       </article>
     </div>

@@ -11,10 +11,12 @@ import {
 } from '../store.js';
 
 const { t } = useI18n();
+const isDev = import.meta.env.VITE_ENV === 'development';
 const route = useRoute();
 
 const stickerNumbers = Array.from({ length: 600 }, (_, i) => String(i + 1));
 const registerRepeatPassword = ref('');
+const totalStickerCount = stickerNumbers.length;
 
 const countryOptions = Object.keys(locations).sort((a, b) => a.localeCompare(b));
 const passwordsMatch = computed(
@@ -23,6 +25,12 @@ const passwordsMatch = computed(
 const showPasswordFeedback = computed(
   () => registerForm.password !== '' || registerRepeatPassword.value !== ''
 );
+const collectedStickerCount = computed(() => totalStickerCount - profileForm.needs.length);
+const collectedStickerPercent = computed(() =>
+  Math.max(0, Math.min(100, (collectedStickerCount.value / totalStickerCount) * 100))
+);
+const collectedStickerPercentLabel = computed(() => collectedStickerPercent.value.toFixed(1));
+const profileCollectedStickerCount = computed(() => totalStickerCount - profileForm.needs.length);
 
 function toggleSticker(form, key, sticker) {
   const list = form[key];
@@ -42,6 +50,28 @@ function selectAllStickers(form, key) {
 
 function clearAllStickers(form, key) {
   form[key].splice(0, form[key].length);
+}
+
+function isProfileStickerCollected(sticker) {
+  return !profileForm.needs.includes(sticker);
+}
+
+function toggleProfileCollectedSticker(sticker) {
+  const missing = new Set(profileForm.needs);
+  if (missing.has(sticker)) {
+    missing.delete(sticker);
+  } else {
+    missing.add(sticker);
+  }
+  profileForm.needs.splice(0, profileForm.needs.length, ...stickerNumbers.filter((entry) => missing.has(entry)));
+}
+
+function selectAllCollectedStickers() {
+  profileForm.needs.splice(0, profileForm.needs.length);
+}
+
+function clearAllCollectedStickers() {
+  profileForm.needs.splice(0, profileForm.needs.length, ...stickerNumbers);
 }
 
 function cityOptionsFor(form) {
@@ -172,20 +202,36 @@ async function submitVerify() {
         <button type="submit" :disabled="loading">{{ t('login') }}</button>
       </form>
 
-      <div class="divider"></div>
+      <template v-if="isDev">
+        <div class="divider"></div>
 
-      <h3>{{ t('verifyNotice') }}</h3>
-      <form class="stack" @submit.prevent="submitVerify">
-        <input v-model="verificationToken" placeholder="Verification token" />
-        <button type="submit" class="secondary" :disabled="loading">Verify email</button>
-      </form>
+        <h3>{{ t('verifyNotice') }}</h3>
+        <form class="stack" @submit.prevent="submitVerify">
+          <input v-model="verificationToken" placeholder="Verification token" />
+          <button type="submit" class="secondary" :disabled="loading">Verify email</button>
+        </form>
+      </template>
     </article>
   </section>
 
   <section v-else class="card">
     <h2>{{ t('profileTitle') }}</h2>
     <p>{{ t('predictionDone') }}: {{ completedPredictionsCount }} / {{ predictions.length }}</p>
-    <form class="stack" @submit.prevent="saveProfile">
+    <section class="collection-progress" :aria-label="t('collectionProgressTitle')">
+      <div class="collection-progress-head">
+        <div>
+          <p class="collection-progress-kicker">{{ t('collectionProgressTitle') }}</p>
+          <p class="collection-progress-copy">
+            {{ collectedStickerCount }} / {{ totalStickerCount }} {{ t('collectionProgressCollected') }}
+          </p>
+        </div>
+        <strong class="collection-progress-percent">{{ collectedStickerPercentLabel }}%</strong>
+      </div>
+      <div class="collection-progress-track" role="progressbar" aria-valuemin="0" :aria-valuemax="totalStickerCount" :aria-valuenow="collectedStickerCount">
+        <span class="collection-progress-fill" :style="{ width: `${collectedStickerPercent}%` }"></span>
+      </div>
+    </section>
+    <form class="stack profile-form" @submit.prevent="saveProfile">
       <CountrySelect
         v-model="profileForm.country"
         :options="countryOptions"
@@ -201,10 +247,10 @@ async function submitVerify() {
       </select>
 
       <details class="picker-panel">
-        <summary>{{ t('neededStickers') }} | {{ t('selectedCount') }}: {{ profileForm.needs.length }}</summary>
+        <summary>{{ t('collectedStickers') }} | {{ t('selectedCount') }}: {{ profileCollectedStickerCount }}</summary>
         <div class="picker-actions">
-          <button type="button" class="secondary" @click="selectAllStickers(profileForm, 'needs')">{{ t('selectAll') }}</button>
-          <button type="button" class="secondary" @click="clearAllStickers(profileForm, 'needs')">{{ t('deselectAll') }}</button>
+          <button type="button" class="secondary" @click="selectAllCollectedStickers">{{ t('selectAll') }}</button>
+          <button type="button" class="secondary" @click="clearAllCollectedStickers">{{ t('deselectAll') }}</button>
         </div>
         <div class="sticker-grid">
           <button
@@ -212,8 +258,8 @@ async function submitVerify() {
             :key="`profile-needs-${sticker}`"
             type="button"
             class="sticker-tile"
-            :class="{ selected: isStickerSelected(profileForm, 'needs', sticker) }"
-            @click="toggleSticker(profileForm, 'needs', sticker)"
+            :class="{ selected: isProfileStickerCollected(sticker) }"
+            @click="toggleProfileCollectedSticker(sticker)"
           >{{ sticker }}</button>
         </div>
       </details>

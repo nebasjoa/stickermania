@@ -1,7 +1,7 @@
 import express from 'express';
 import { query } from '../db.js';
 import { requireAuth } from '../auth.js';
-import { normalizeStickerNumbers } from '../utils.js';
+import { normalizeStickerNumbers, sortStickerNumbers } from '../utils.js';
 
 const router = express.Router();
 
@@ -30,7 +30,15 @@ router.get('/search', requireAuth, async (req, res) => {
 
   if (stickerNumbers.length) {
     const placeholders = stickerNumbers.map(() => '?').join(', ');
-    filters.push(`us.sticker_number IN (${placeholders})`);
+    filters.push(
+      `EXISTS (
+         SELECT 1
+         FROM user_stickers us_filter
+         WHERE us_filter.user_id = u.id
+           AND us_filter.sticker_type = 'offer'
+           AND us_filter.sticker_number IN (${placeholders})
+       )`
+    );
     params.push(...stickerNumbers);
   }
 
@@ -54,7 +62,7 @@ router.get('/search', requireAuth, async (req, res) => {
        us.sticker_number,
        us.sticker_type
      FROM users u
-     JOIN user_stickers us ON us.user_id = u.id
+     LEFT JOIN user_stickers us ON us.user_id = u.id
      WHERE ${filters.join(' AND ')}
      ORDER BY u.username ASC, us.sticker_number ASC`,
     params
@@ -86,7 +94,11 @@ router.get('/search', requireAuth, async (req, res) => {
   }
 
   return res.json({
-    users: [...userMap.values()]
+    users: [...userMap.values()].map((user) => ({
+      ...user,
+      needs: sortStickerNumbers(user.needs),
+      offers: sortStickerNumbers(user.offers)
+    }))
   });
 });
 
