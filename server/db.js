@@ -78,7 +78,12 @@ export async function ensureSchema() {
     }
 
     for (const statement of statements) {
-      await query(statement);
+      try {
+        await query(statement);
+      } catch (err) {
+        // 1060 = duplicate column name — column already exists, safe to skip
+        if (err.errno !== 1060) throw err;
+      }
     }
   } finally {
     await adminPool.end();
