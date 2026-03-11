@@ -139,5 +139,5 @@ export const games = [
   { matchNumber: 103, group: '-', stage: 'third', homeTeam: 'Loser Match 101',    awayTeam: 'Loser Match 102',      startsAt: '2026-07-18T19:00:00Z', venue: 'Hard Rock Stadium',        city: 'Miami' },
 
   // ── Final ─────────────────────────────────────────────────────────────────
-  { matchNumber: 104, group: '-', stage: 'final', homeTeam: 'Winner Match 101',   awayTeam: 'Winner Match 102',     startsAt: '2026-07-19T23:00:00Z', venue: 'MetLife Stadium',          city: 'East Rutherford' },
+  { matchNumber: 104, group: '-', stage: 'final', homeTeam: 'Winner Match 101',   awayTeam: 'Winner Match 102',     startsAt: '2026-07-19T19:00:00Z', venue: 'MetLife Stadium',          city: 'East Rutherford' },
 ];

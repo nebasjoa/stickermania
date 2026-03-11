@@ -12,6 +12,9 @@ export const trades = ref([]);
 export const meetups = ref([]);
 export const homeLeaderboard = ref([]);
 export const homeRecentCollectors = ref([]);
+export const upcomingGames = ref([]);
+export const upcomingGamesDate = ref(null);
+export const groupStandings = ref({});
 export const predictions = ref([]);
 export const predictionDrafts = reactive({});
 export const predictionSaved = reactive({});
@@ -41,6 +44,7 @@ export const activeKnockoutStage = ref('r32');
 
 // ── Computed ──────────────────────────────────────────────────────────────────
 export const isAuthenticated = computed(() => Boolean(currentUser.value));
+export const isAdmin = computed(() => Boolean(currentUser.value?.isAdmin));
 
 export const homeMeetups = computed(() =>
   [...meetups.value]
@@ -129,6 +133,17 @@ export async function fetchHomeLeaderboard() {
 export async function fetchRecentCollectors() {
   const { data } = await api.get('/users/recent');
   homeRecentCollectors.value = data.users;
+}
+
+export async function fetchUpcomingGames() {
+  const { data } = await api.get('/predictions/upcoming');
+  upcomingGames.value = data.games;
+  upcomingGamesDate.value = data.date;
+}
+
+export async function fetchGroupStandings() {
+  const { data } = await api.get('/predictions/standings');
+  groupStandings.value = data.standings;
 }
 
 export async function fetchPredictions() {
@@ -317,14 +332,30 @@ export async function savePrediction(gameId) {
   const draft = predictionDrafts[gameId];
   try {
     await api.put(`/predictions/games/${gameId}`, {
-      homeScore: Number(draft.home),
-      awayScore: Number(draft.away)
+      homeScore: draft.home === '' ? '' : Number(draft.home),
+      awayScore: draft.away === '' ? '' : Number(draft.away)
     });
     predictionSaved[gameId] = true;
     setTimeout(() => { predictionSaved[gameId] = false; }, 2500);
     await fetchPredictions();
   } catch (error) {
     setStatus('', error.response?.data?.message || 'Could not save prediction.');
+  } finally {
+    loading.value = false;
+  }
+}
+
+export async function saveResult(gameId, homeScore, awayScore) {
+  loading.value = true;
+  setStatus();
+  try {
+    const { data } = await api.put(`/predictions/games/${gameId}/result`, { homeScore, awayScore });
+    setStatus(data.message);
+    await fetchPredictions();
+    await fetchGroupStandings();
+    await fetchHomeLeaderboard();
+  } catch (error) {
+    setStatus('', error.response?.data?.message || 'Could not save result.');
   } finally {
     loading.value = false;
   }

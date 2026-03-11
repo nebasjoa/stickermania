@@ -44,8 +44,16 @@ app.get('*', (req, res, next) => {
 async function seedGames() {
   for (const game of wcGames) {
     await query(
-      `INSERT IGNORE INTO wc_games (match_number, group_name, stage, home_team, away_team, starts_at, venue, city)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO wc_games (match_number, group_name, stage, home_team, away_team, starts_at, venue, city)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+         group_name = VALUES(group_name),
+         stage = VALUES(stage),
+         home_team = VALUES(home_team),
+         away_team = VALUES(away_team),
+         starts_at = VALUES(starts_at),
+         venue = VALUES(venue),
+         city = VALUES(city)`,
       [game.matchNumber, game.group, game.stage || 'group', game.homeTeam, game.awayTeam, new Date(game.startsAt), game.venue, game.city]
     );
   }

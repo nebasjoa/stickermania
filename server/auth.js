@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { query } from './db.js';
 
 const cookieName = 'stickermania_token';
 
@@ -7,7 +8,8 @@ export function createAuthToken(user) {
     {
       id: user.id,
       username: user.username,
-      email: user.email
+      email: user.email,
+      isAdmin: Boolean(user.is_admin)
     },
     process.env.JWT_SECRET || 'change-me',
     { expiresIn: '7d' }
@@ -42,6 +44,26 @@ export function requireAuth(req, res, next) {
   } catch (_error) {
     return res.status(401).json({ message: 'Invalid session.' });
   }
+}
+
+export function requireAdmin(req, res, next) {
+  requireAuth(req, res, async () => {
+    try {
+      const users = await query(
+        'SELECT is_admin FROM users WHERE id = ? LIMIT 1',
+        [req.user.id]
+      );
+
+      if (!users.length || !users[0].is_admin) {
+        return res.status(403).json({ message: 'Admin access required.' });
+      }
+
+      req.user.isAdmin = true;
+      return next();
+    } catch (_error) {
+      return res.status(500).json({ message: 'Could not verify admin access.' });
+    }
+  });
 }
 
 export function attachOptionalAuth(req, _res, next) {

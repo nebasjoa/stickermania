@@ -107,7 +107,7 @@ router.post('/login', async (req, res) => {
   }
 
   const users = await query(
-    `SELECT id, username, email, password_hash, is_verified, country, city, postal_trade_enabled
+    `SELECT id, username, email, password_hash, is_verified, is_admin, country, city, postal_trade_enabled
      FROM users
      WHERE email = ?
      LIMIT 1`,
@@ -138,7 +138,8 @@ router.post('/login', async (req, res) => {
       email: user.email,
       country: user.country,
       city: user.city,
-      postalTradeEnabled: Boolean(user.postal_trade_enabled)
+      postalTradeEnabled: Boolean(user.postal_trade_enabled),
+      isAdmin: Boolean(user.is_admin)
     }
   });
 });
@@ -150,7 +151,7 @@ router.post('/logout', (_req, res) => {
 
 router.get('/me', requireAuth, async (req, res) => {
   const users = await query(
-    `SELECT id, username, email, country, city, postal_trade_enabled
+    `SELECT id, username, email, is_admin, country, city, postal_trade_enabled
      FROM users
      WHERE id = ?
      LIMIT 1`,
@@ -177,6 +178,7 @@ router.get('/me', requireAuth, async (req, res) => {
       country: users[0].country,
       city: users[0].city,
       postalTradeEnabled: Boolean(users[0].postal_trade_enabled),
+      isAdmin: Boolean(users[0].is_admin),
       needs,
       offers
     }

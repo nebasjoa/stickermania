@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue';
+import CountryLabel from '../components/CountryLabel.vue';
 import {
   isAuthenticated, loading, predictions, predictionDrafts, predictionSaved,
   activePredictionGroup, activeKnockoutStage, savePrediction
@@ -7,10 +8,10 @@ import {
 
 const PREDICTION_GROUPS = ['A','B','C','D','E','F','G','H','I','J','K','L'];
 const KNOCKOUT_STAGES = [
-  { key: 'r32',   label: 'Round of 32' },
-  { key: 'r16',   label: 'Round of 16' },
-  { key: 'qf',    label: 'Quarter-Finals' },
-  { key: 'sf',    label: 'Semi-Finals' },
+  { key: 'r32', label: 'Round of 32' },
+  { key: 'r16', label: 'Round of 16' },
+  { key: 'qf', label: 'Quarter-Finals' },
+  { key: 'sf', label: 'Semi-Finals' },
   { key: 'third', label: '3rd Place' },
   { key: 'final', label: 'Final' },
 ];
@@ -45,6 +46,21 @@ function formatGameDate(iso) {
     hour: '2-digit', minute: '2-digit'
   });
 }
+
+function canSubmitPrediction(game) {
+  const draft = predictionDrafts[game.id];
+  const isEmpty = draft.home === '' && draft.away === '';
+  const hasBothScores = draft.home !== '' && draft.away !== '';
+  return hasBothScores || (isEmpty && Boolean(game.prediction));
+}
+
+function predictionActionLabel(game) {
+  const draft = predictionDrafts[game.id];
+  if (draft.home === '' && draft.away === '' && game.prediction) {
+    return 'Clear';
+  }
+  return 'Save';
+}
 </script>
 
 <template>
@@ -74,7 +90,6 @@ function formatGameDate(iso) {
       </div>
     </article>
 
-    <!-- Group stage games -->
     <div v-if="activePredictionGroup !== 'KO'" class="prediction-list">
       <article
         v-for="game in (gamesByGroup[activePredictionGroup] || [])"
@@ -90,36 +105,44 @@ function formatGameDate(iso) {
         </div>
 
         <div class="prediction-matchup">
-          <span class="pred-team home">{{ game.homeTeam }}</span>
-          <div class="pred-scores">
-            <input
-              v-model="predictionDrafts[game.id].home"
-              type="number" min="0" max="20"
-              class="score-input"
-              :disabled="isGameLocked(game) || !isAuthenticated"
-              placeholder="–"
-            />
-            <span class="pred-sep">:</span>
-            <input
-              v-model="predictionDrafts[game.id].away"
-              type="number" min="0" max="20"
-              class="score-input"
-              :disabled="isGameLocked(game) || !isAuthenticated"
-              placeholder="–"
-            />
+          <CountryLabel class="pred-team home" :country="game.homeTeam" />
+          <div class="pred-score-stack">
+            <div class="pred-scores">
+              <input
+                v-model="predictionDrafts[game.id].home"
+                type="number" min="0" max="20"
+                class="score-input"
+                :disabled="isGameLocked(game) || !isAuthenticated"
+                placeholder="-"
+              />
+              <span class="pred-sep">:</span>
+              <input
+                v-model="predictionDrafts[game.id].away"
+                type="number" min="0" max="20"
+                class="score-input"
+                :disabled="isGameLocked(game) || !isAuthenticated"
+                placeholder="-"
+              />
+            </div>
+            <div v-if="game.actualHome != null" class="actual-result">
+              Final: {{ game.actualHome }} - {{ game.actualAway }}
+            </div>
           </div>
-          <span class="pred-team away">{{ game.awayTeam }}</span>
+          <CountryLabel class="pred-team away" :country="game.awayTeam" />
         </div>
 
         <div class="prediction-footer">
-          <span v-if="predictionSaved[game.id]" class="pred-saved">✓ Saved</span>
+          <span v-if="game.prediction?.points != null" :class="['points-badge', `points-badge--${game.prediction.points}`]">
+            {{ game.prediction.points }} pt{{ game.prediction.points !== 1 ? 's' : '' }}
+          </span>
+          <span v-else-if="predictionSaved[game.id]" class="pred-saved">Saved</span>
           <button
             v-if="!isGameLocked(game) && isAuthenticated"
             type="button"
             class="pred-save-btn"
-            :disabled="loading || predictionDrafts[game.id].home === '' || predictionDrafts[game.id].away === ''"
+            :disabled="loading || !canSubmitPrediction(game)"
             @click="savePrediction(game.id)"
-          >Save</button>
+          >{{ predictionActionLabel(game) }}</button>
         </div>
       </article>
 
@@ -128,7 +151,6 @@ function formatGameDate(iso) {
       </article>
     </div>
 
-    <!-- Knockout phase -->
     <div v-else class="prediction-list">
       <article class="card knockout-stage-nav">
         <div class="knockout-stage-tabs">
@@ -162,36 +184,44 @@ function formatGameDate(iso) {
             </div>
 
             <div class="prediction-matchup">
-              <span class="pred-team home">{{ game.homeTeam }}</span>
-              <div class="pred-scores">
-                <input
-                  v-model="predictionDrafts[game.id].home"
-                  type="number" min="0" max="20"
-                  class="score-input"
-                  :disabled="isGameLocked(game) || !isAuthenticated"
-                  placeholder="–"
-                />
-                <span class="pred-sep">:</span>
-                <input
-                  v-model="predictionDrafts[game.id].away"
-                  type="number" min="0" max="20"
-                  class="score-input"
-                  :disabled="isGameLocked(game) || !isAuthenticated"
-                  placeholder="–"
-                />
+              <CountryLabel class="pred-team home" :country="game.homeTeam" />
+              <div class="pred-score-stack">
+                <div class="pred-scores">
+                  <input
+                    v-model="predictionDrafts[game.id].home"
+                    type="number" min="0" max="20"
+                    class="score-input"
+                    :disabled="isGameLocked(game) || !isAuthenticated"
+                    placeholder="-"
+                  />
+                  <span class="pred-sep">:</span>
+                  <input
+                    v-model="predictionDrafts[game.id].away"
+                    type="number" min="0" max="20"
+                    class="score-input"
+                    :disabled="isGameLocked(game) || !isAuthenticated"
+                    placeholder="-"
+                  />
+                </div>
+                <div v-if="game.actualHome != null" class="actual-result">
+                  Final: {{ game.actualHome }} - {{ game.actualAway }}
+                </div>
               </div>
-              <span class="pred-team away">{{ game.awayTeam }}</span>
+              <CountryLabel class="pred-team away" :country="game.awayTeam" />
             </div>
 
             <div class="prediction-footer">
-              <span v-if="predictionSaved[game.id]" class="pred-saved">✓ Saved</span>
+              <span v-if="game.prediction?.points != null" :class="['points-badge', `points-badge--${game.prediction.points}`]">
+                {{ game.prediction.points }} pt{{ game.prediction.points !== 1 ? 's' : '' }}
+              </span>
+              <span v-else-if="predictionSaved[game.id]" class="pred-saved">Saved</span>
               <button
                 v-if="!isGameLocked(game) && isAuthenticated"
                 type="button"
                 class="pred-save-btn"
-                :disabled="loading || predictionDrafts[game.id].home === '' || predictionDrafts[game.id].away === ''"
+                :disabled="loading || !canSubmitPrediction(game)"
                 @click="savePrediction(game.id)"
-              >Save</button>
+              >{{ predictionActionLabel(game) }}</button>
             </div>
           </article>
 

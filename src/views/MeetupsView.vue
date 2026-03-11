@@ -2,6 +2,8 @@
 import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import locations from '../data/locations.json';
+import CountrySelect from '../components/CountrySelect.vue';
+import LocationLabel from '../components/LocationLabel.vue';
 import {
   isAuthenticated, loading, meetups, meetupFilterForm, meetupForm,
   createMeetup, fetchMeetups, setStatus, toggleMeetupAttendance
@@ -45,12 +47,11 @@ async function searchMeetups() {
       <h2>{{ t('meetupBrowseTitle') }}</h2>
       <form class="search-row" @submit.prevent="searchMeetups">
         <div class="search-fields">
-          <select v-model="meetupFilterForm.country">
-            <option value="">{{ t('anyCountry') }}</option>
-            <option v-for="country in countryOptions" :key="`meetup-filter-${country}`" :value="country">
-              {{ country }}
-            </option>
-          </select>
+          <CountrySelect
+            v-model="meetupFilterForm.country"
+            :options="countryOptions"
+            :placeholder="t('anyCountry')"
+          />
           <select v-model="meetupFilterForm.city" :disabled="!meetupFilterForm.country">
             <option value="">{{ t('anyCity') }}</option>
             <option v-for="city in meetupFilterCityOptions" :key="`meetup-city-${city}`" :value="city">
@@ -67,12 +68,11 @@ async function searchMeetups() {
       <form class="stack" @submit.prevent="createMeetup">
         <input v-model="meetupForm.title" :placeholder="t('meetupTitle')" required />
         <textarea v-model="meetupForm.description" :placeholder="t('meetupDescription')" required></textarea>
-        <select v-model="meetupForm.country" required>
-          <option disabled value="">{{ t('searchCountry') }}</option>
-          <option v-for="country in countryOptions" :key="`meetup-form-country-${country}`" :value="country">
-            {{ country }}
-          </option>
-        </select>
+        <CountrySelect
+          v-model="meetupForm.country"
+          :options="countryOptions"
+          :placeholder="t('searchCountry')"
+        />
         <select v-model="meetupForm.city" :disabled="!meetupForm.country" required>
           <option disabled value="">{{ t('searchCity') }}</option>
           <option v-for="city in meetupFormCityOptions" :key="`meetup-form-city-${city}`" :value="city">
@@ -91,7 +91,7 @@ async function searchMeetups() {
         <div class="card-top">
           <div>
             <h3>{{ meetup.title }}</h3>
-            <p>{{ meetup.city }}, {{ meetup.country }}</p>
+            <p><LocationLabel :city="meetup.city" :country="meetup.country" /></p>
           </div>
           <span class="status">{{ formatMeetupDate(meetup.starts_at) }}</span>
         </div>

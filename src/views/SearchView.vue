@@ -2,6 +2,8 @@
 import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import locations from '../data/locations.json';
+import CountrySelect from '../components/CountrySelect.vue';
+import LocationLabel from '../components/LocationLabel.vue';
 import {
   isAuthenticated, loading, searchForm, searchResults,
   getTradeDraft, searchCollectors, sendTradeRequest, setStatus
@@ -35,10 +37,12 @@ async function doSearch() {
             :placeholder="t('searchPlaceholder')"
             :disabled="!isAuthenticated"
           />
-          <select v-model="searchForm.country" :disabled="!isAuthenticated">
-            <option value="">{{ t('anyCountry') }}</option>
-            <option v-for="country in countryOptions" :key="country" :value="country">{{ country }}</option>
-          </select>
+          <CountrySelect
+            v-model="searchForm.country"
+            :options="countryOptions"
+            :placeholder="t('anyCountry')"
+            :disabled="!isAuthenticated"
+          />
           <select v-model="searchForm.city" :disabled="!isAuthenticated || !searchForm.country">
             <option value="">{{ t('anyCity') }}</option>
             <option v-for="city in searchCityOptions" :key="city" :value="city">{{ city }}</option>
@@ -54,15 +58,27 @@ async function doSearch() {
         <div class="card-top">
           <div>
             <h3>{{ user.username }}</h3>
-            <p>{{ user.city }}, {{ user.country }}</p>
+            <p><LocationLabel :city="user.city" :country="user.country" /></p>
           </div>
           <span class="pill" :class="{ muted: !user.postalTradeEnabled }">
             {{ user.postalTradeEnabled ? t('byPost') : t('inPerson') }}
           </span>
         </div>
 
-        <p><strong>{{ t('neededStickers') }}:</strong> {{ user.needs.join(', ') || '-' }}</p>
-        <p><strong>{{ t('offeredStickers') }}:</strong> {{ user.offers.join(', ') || '-' }}</p>
+        <div class="sticker-section">
+          <strong>{{ t('neededStickers') }}:</strong>
+          <span v-if="user.needs.length" class="sticker-list">
+            <span v-for="n in user.needs" :key="n" class="sticker-chip need">{{ n }}</span>
+          </span>
+          <span v-else class="text-muted">-</span>
+        </div>
+        <div class="sticker-section">
+          <strong>{{ t('offeredStickers') }}:</strong>
+          <span v-if="user.offers.length" class="sticker-list">
+            <span v-for="n in user.offers" :key="n" class="sticker-chip offer">{{ n }}</span>
+          </span>
+          <span v-else class="text-muted">-</span>
+        </div>
 
         <form class="stack compact" @submit.prevent="sendTradeRequest(user.id)">
           <input v-model="getTradeDraft(user.id).requestedStickers" :placeholder="t('neededStickers')" />

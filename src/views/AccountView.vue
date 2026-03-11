@@ -1,7 +1,9 @@
 <script setup>
-import { onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import locations from '../data/locations.json';
+import CountrySelect from '../components/CountrySelect.vue';
 import {
   isAuthenticated, loading, profileForm, registerForm, loginForm, verificationToken,
   completedPredictionsCount, predictions,
@@ -12,6 +14,15 @@ const { t } = useI18n();
 const route = useRoute();
 
 const stickerNumbers = Array.from({ length: 600 }, (_, i) => String(i + 1));
+const registerRepeatPassword = ref('');
+
+const countryOptions = Object.keys(locations).sort((a, b) => a.localeCompare(b));
+const passwordsMatch = computed(
+  () => registerForm.password !== '' && registerForm.password === registerRepeatPassword.value
+);
+const showPasswordFeedback = computed(
+  () => registerForm.password !== '' || registerRepeatPassword.value !== ''
+);
 
 function toggleSticker(form, key, sticker) {
   const list = form[key];
@@ -33,6 +44,21 @@ function clearAllStickers(form, key) {
   form[key].splice(0, form[key].length);
 }
 
+function cityOptionsFor(form) {
+  const knownCities = form.country ? (locations[form.country] || []) : [];
+  if (form.city && !knownCities.includes(form.city)) {
+    return [form.city, ...knownCities];
+  }
+  return knownCities;
+}
+
+function syncCitySelection(form) {
+  const validCities = form.country ? (locations[form.country] || []) : [];
+  if (!validCities.includes(form.city)) {
+    form.city = '';
+  }
+}
+
 onMounted(async () => {
   const token = route.query.verify;
   if (token) {
@@ -43,7 +69,15 @@ onMounted(async () => {
 });
 
 async function submitRegister() {
-  await handleRegister();
+  if (!passwordsMatch.value) {
+    setStatus('', t('passwordsDoNotMatch'));
+    return;
+  }
+
+  const didRegister = await handleRegister();
+  if (didRegister) {
+    registerRepeatPassword.value = '';
+  }
 }
 
 async function submitLogin() {
@@ -63,8 +97,28 @@ async function submitVerify() {
         <input v-model="registerForm.username" :placeholder="t('username')" required />
         <input v-model="registerForm.email" :placeholder="t('email')" type="email" required />
         <input v-model="registerForm.password" :placeholder="t('password')" type="password" required />
-        <input v-model="registerForm.country" :placeholder="t('country')" />
-        <input v-model="registerForm.city" :placeholder="t('city')" />
+        <input v-model="registerRepeatPassword" :placeholder="t('repeatPassword')" type="password" required />
+        <p
+          v-if="showPasswordFeedback"
+          :class="['form-feedback', passwordsMatch ? 'form-feedback--success' : 'form-feedback--error']"
+        >
+          {{ passwordsMatch ? t('passwordsMatch') : t('passwordsDoNotMatch') }}
+        </p>
+
+        <CountrySelect
+          v-model="registerForm.country"
+          :options="countryOptions"
+          :placeholder="t('selectCountry')"
+          @update:modelValue="syncCitySelection(registerForm)"
+        />
+
+        <select v-model="registerForm.city" :disabled="!registerForm.country">
+          <option value="">{{ registerForm.country ? t('selectCity') : t('selectCountryFirst') }}</option>
+          <option v-for="city in cityOptionsFor(registerForm)" :key="`register-city-${city}`" :value="city">
+            {{ city }}
+          </option>
+        </select>
+
         <details class="picker-panel">
           <summary>{{ t('neededStickers') }} | {{ t('selectedCount') }}: {{ registerForm.needs.length }}</summary>
           <div class="picker-actions">
@@ -82,6 +136,7 @@ async function submitVerify() {
             >{{ sticker }}</button>
           </div>
         </details>
+
         <details class="picker-panel">
           <summary>{{ t('offeredStickers') }} | {{ t('selectedCount') }}: {{ registerForm.offers.length }}</summary>
           <div class="picker-actions">
@@ -99,11 +154,13 @@ async function submitVerify() {
             >{{ sticker }}</button>
           </div>
         </details>
+
         <label class="checkbox-row">
           <input v-model="registerForm.postalTradeEnabled" type="checkbox" />
           <span>{{ t('postalTrade') }}</span>
         </label>
-        <button type="submit" :disabled="loading">{{ t('register') }}</button>
+
+        <button type="submit" :disabled="loading || !passwordsMatch">{{ t('register') }}</button>
       </form>
     </article>
 
@@ -129,8 +186,20 @@ async function submitVerify() {
     <h2>{{ t('profileTitle') }}</h2>
     <p>{{ t('predictionDone') }}: {{ completedPredictionsCount }} / {{ predictions.length }}</p>
     <form class="stack" @submit.prevent="saveProfile">
-      <input v-model="profileForm.country" :placeholder="t('country')" />
-      <input v-model="profileForm.city" :placeholder="t('city')" />
+      <CountrySelect
+        v-model="profileForm.country"
+        :options="countryOptions"
+        :placeholder="t('selectCountry')"
+        @update:modelValue="syncCitySelection(profileForm)"
+      />
+
+      <select v-model="profileForm.city" :disabled="!profileForm.country">
+        <option value="">{{ profileForm.country ? t('selectCity') : t('selectCountryFirst') }}</option>
+        <option v-for="city in cityOptionsFor(profileForm)" :key="`profile-city-${city}`" :value="city">
+          {{ city }}
+        </option>
+      </select>
+
       <details class="picker-panel">
         <summary>{{ t('neededStickers') }} | {{ t('selectedCount') }}: {{ profileForm.needs.length }}</summary>
         <div class="picker-actions">
@@ -148,6 +217,7 @@ async function submitVerify() {
           >{{ sticker }}</button>
         </div>
       </details>
+
       <details class="picker-panel">
         <summary>{{ t('offeredStickers') }} | {{ t('selectedCount') }}: {{ profileForm.offers.length }}</summary>
         <div class="picker-actions">
@@ -165,10 +235,12 @@ async function submitVerify() {
           >{{ sticker }}</button>
         </div>
       </details>
+
       <label class="checkbox-row">
         <input v-model="profileForm.postalTradeEnabled" type="checkbox" />
         <span>{{ t('postalTrade') }}</span>
       </label>
+
       <button type="submit" :disabled="loading">{{ t('saveProfile') }}</button>
     </form>
   </section>
