@@ -19,7 +19,9 @@ export async function sendVerificationEmail({ email, username, token }) {
   const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
   const verifyUrl = `${clientUrl}/?verify=${token}`;
 
-  await resend.emails.send({
+  console.log(`[mailer] Sending verification email to ${email} (user: ${username})`);
+
+  const result = await resend.emails.send({
     from: fromEmail,
     to: email,
     subject: 'Verify your Stickermania account',
@@ -34,5 +36,11 @@ export async function sendVerificationEmail({ email, username, token }) {
     `
   });
 
+  if (result.error) {
+    console.error(`[mailer] Resend error for ${email}:`, result.error);
+    return { delivered: false, error: result.error };
+  }
+
+  console.log(`[mailer] Email delivered to ${email}, id: ${result.data?.id}`);
   return { delivered: true, skippedInDevelopment: false };
 }

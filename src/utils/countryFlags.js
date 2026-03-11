@@ -27,6 +27,7 @@ const COUNTRY_FLAG_CODES = {
   Morocco: 'ma',
   Netherlands: 'nl',
   Norway: 'no',
+  Italy: 'it',
   Panama: 'pa',
   Paraguay: 'py',
   Portugal: 'pt',

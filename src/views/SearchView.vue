@@ -122,20 +122,26 @@ async function doSearch() {
           </span>
         </div>
 
-        <div class="sticker-section">
-          <strong>{{ collectorNeedsLabel(user) }}:</strong>
+        <details class="sticker-section search-sticker-panel">
+          <summary>
+            <span>{{ collectorNeedsLabel(user) }}:</span>
+            <span class="search-sticker-panel-count">{{ user.needs.length }}</span>
+          </summary>
           <span v-if="user.needs.length" class="sticker-list">
             <span v-for="n in user.needs" :key="n" class="sticker-chip need">{{ n }}</span>
           </span>
           <span v-else class="text-muted">-</span>
-        </div>
-        <div class="sticker-section">
-          <strong>{{ collectorOffersLabel(user) }}:</strong>
+        </details>
+        <details class="sticker-section search-sticker-panel">
+          <summary>
+            <span>{{ collectorOffersLabel(user) }}:</span>
+            <span class="search-sticker-panel-count">{{ user.offers.length }}</span>
+          </summary>
           <span v-if="user.offers.length" class="sticker-list">
             <span v-for="n in user.offers" :key="n" class="sticker-chip offer">{{ n }}</span>
           </span>
           <span v-else class="text-muted">-</span>
-        </div>
+        </details>
 
         <form class="stack compact" @submit.prevent="sendTradeRequest(user.id)">
           <div class="trade-sticker-picker">

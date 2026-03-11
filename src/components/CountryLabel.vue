@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { getCountryFlagCode } from '../utils/countryFlags.js';
 
 const props = defineProps({
@@ -13,7 +14,15 @@ const props = defineProps({
   }
 });
 
-const text = computed(() => props.country || props.fallback);
+const { t, te } = useI18n();
+
+const text = computed(() => {
+  const country = String(props.country || '').trim();
+  if (country && te(`countries.${country}`)) {
+    return t(`countries.${country}`);
+  }
+  return country || props.fallback;
+});
 const flagCode = computed(() => getCountryFlagCode(props.country));
 </script>
 

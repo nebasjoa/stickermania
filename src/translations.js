@@ -101,7 +101,15 @@ export const messages = {
     footerTimesValue: 'Shown in your local browser time',
     footerTradeLabel: 'Trading',
     footerTradeValue: 'Use Search for collectors and Meetups for in-person swaps',
-    footerSignedInAs: 'Signed in as'
+    footerSignedInAs: 'Signed in as',
+    countries: {
+      Germany: 'Germany',
+      Serbia: 'Serbia',
+      'United States': 'United States',
+      Italy: 'Italy',
+      Spain: 'Spain',
+      France: 'France'
+    }
   },
 
   de: {
@@ -206,7 +214,15 @@ export const messages = {
     footerTimesValue: 'Werden in deiner lokalen Browser-Zeit angezeigt',
     footerTradeLabel: 'Tauschen',
     footerTradeValue: 'Nutze Suche fur Sammler und Treffen fur Tausch vor Ort',
-    footerSignedInAs: 'Angemeldet als'
+    footerSignedInAs: 'Angemeldet als',
+    countries: {
+      Germany: 'Deutschland',
+      Serbia: 'Serbien',
+      'United States': 'Vereinigte Staaten',
+      Italy: 'Italien',
+      Spain: 'Spanien',
+      France: 'Frankreich'
+    }
   },
 
   sr: {
@@ -311,6 +327,14 @@ export const messages = {
     footerTimesValue: 'Prikazuje se po lokalnom vremenu u browseru',
     footerTradeLabel: 'Razmena',
     footerTradeValue: 'Koristi Pretragu za kolekcionare i Okupljanja za razmenu uzivo',
-    footerSignedInAs: 'Ulogovan kao'
+    footerSignedInAs: 'Ulogovan kao',
+    countries: {
+      Germany: 'Nemacka',
+      Serbia: 'Srbija',
+      'United States': 'Sjedinjene Americke Drzave',
+      Italy: 'Italija',
+      Spain: 'Spanija',
+      France: 'Francuska'
+    }
   }
 };
