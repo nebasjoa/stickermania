@@ -1,6 +1,6 @@
 export const messages = {
   en: {
-    appName: 'Stickermania',
+    appName: 'World Cup Stuff',
     tagline: 'Trade FIFA World Cup stickers with collectors near you or by post.',
     heroEyebrow: 'WORLD CUP COLLECTOR HUB',
     navHome: 'Home',
@@ -113,7 +113,7 @@ export const messages = {
   },
 
   de: {
-    appName: 'Stickermania',
+    appName: 'World Cup Stuff',
     tagline: 'Tausche FIFA-World-Cup-Sticker mit Sammlern in deiner Nähe oder per Post.',
     heroEyebrow: 'WORLD CUP SAMMLER HUB',
     navHome: 'Startseite',
@@ -226,7 +226,7 @@ export const messages = {
   },
 
   sr: {
-    appName: 'Stickermania',
+    appName: 'World Cup Stuff',
     tagline: 'Menjaj FIFA World Cup sličice sa kolekcionarima u blizini ili poštom.',
     heroEyebrow: 'Svetsko prvenstvo u fudbalu 2026',
     navHome: 'Početna',

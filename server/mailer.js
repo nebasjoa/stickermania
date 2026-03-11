@@ -24,13 +24,14 @@ export async function sendVerificationEmail({ email, username, token }) {
   const result = await resend.emails.send({
     from: fromEmail,
     to: email,
-    subject: 'Verify your Stickermania account',
+    subject: 'Verify your World Cup Stuff account',
     html: `
       <div style="font-family: Arial, sans-serif; line-height: 1.5;">
         <h2>Hello ${username},</h2>
-        <p>Verify your account to start trading FIFA World Cup stickers.</p>
-        <p><a href="${verifyUrl}">Verify email address</a></p>
-        <p>If the button does not work, open this link:</p>
+        <p>Welcome to World Cup Stuff.</p>
+        <p>Confirm your email address to activate your account and start trading FIFA World Cup stickers.</p>
+        <p><a href="${verifyUrl}">Confirm email address</a></p>
+        <p>If the link above does not work, open this URL in your browser:</p>
         <p>${verifyUrl}</p>
       </div>
     `

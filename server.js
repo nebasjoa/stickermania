@@ -64,7 +64,7 @@ async function bootstrap() {
   await seedGames();
 
   app.listen(port, () => {
-    console.log(`Stickermania listening on http://localhost:${port}`);
+    console.log(`World Cup Stuff listening on http://localhost:${port}`);
   });
 }
 
