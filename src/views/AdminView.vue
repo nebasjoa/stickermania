@@ -119,7 +119,7 @@ async function submitResult(game) {
   <section class="stack">
     <article class="card">
       <h2>Admin - Enter Match Results</h2>
-      <p style="margin:0">Set the final score for each game. Points are automatically awarded to all predictions.</p>
+      <p class="card-intro">Set the final score for each game. Points are automatically awarded to all predictions.</p>
     </article>
 
     <template v-for="(games, group) in groupGames" :key="group">

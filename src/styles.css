@@ -391,12 +391,6 @@ textarea {
   text-transform: uppercase;
 }
 
-.tagline {
-  margin: 0.15rem 0 0;
-  color: #475569;
-  font-size: 0.75rem;
-  max-width: 34rem;
-}
 
 .nav-links,
 .toolbar {
@@ -564,7 +558,6 @@ textarea {
   font-weight: 700;
 }
 
-.lang-flag,
 .lang-trigger .fi,
 .lang-menu .fi,
 .drawer-lang .fi {
@@ -624,6 +617,10 @@ small {
   font-size: 0.82rem;
 }
 
+.card-intro {
+  margin: 0;
+}
+
 /* ── Hero section ───────────────────────────────────────── */
 
 .hero {
@@ -672,14 +669,12 @@ small {
 }
 
 .hero-grid,
-.results-grid,
-.grid-two {
+.results-grid {
   display: grid;
   gap: 1rem;
 }
 
-.hero-grid,
-.grid-two {
+.hero-grid {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
@@ -687,9 +682,6 @@ small {
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
 }
 
-.home-meetups-section {
-  margin-top: 0.25rem;
-}
 
 .info-box {
   border: 1px solid rgba(255, 255, 255, 0.09);
@@ -1655,7 +1647,7 @@ small {
   padding: 0.9rem 1rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: var(--surface-alt);
+  background: var(--surface-muted);
 }
 
 .prediction-points-value {
@@ -2642,7 +2634,7 @@ small {
 }
 
 .drawer-lang button.selected {
-  border-color: #6366f1;
+  border-color: var(--accent);
   color: #a5b4fc;
 }
 

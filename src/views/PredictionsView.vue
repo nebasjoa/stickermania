@@ -145,7 +145,7 @@ function knockoutActualSummary(game) {
   <section>
     <article class="card">
       <h2>Match Predictions</h2>
-      <p v-if="!isAuthenticated" style="margin:0">Login to submit your score predictions. All games are visible to everyone.</p>
+      <p v-if="!isAuthenticated" class="card-intro">Login to submit your score predictions. All games are visible to everyone.</p>
       <div class="group-tabs">
         <button
           v-for="group in PREDICTION_GROUPS"
