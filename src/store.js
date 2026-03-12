@@ -88,7 +88,13 @@ export function initPredictionDrafts() {
   for (const game of predictions.value) {
     predictionDrafts[game.id] = {
       home: game.prediction?.homeScore ?? '',
-      away: game.prediction?.awayScore ?? ''
+      away: game.prediction?.awayScore ?? '',
+      extraTimePlayed: Boolean(game.prediction?.extraTimePlayed),
+      extraHome: game.prediction?.extraHomeScore ?? '',
+      extraAway: game.prediction?.extraAwayScore ?? '',
+      penaltiesPlayed: Boolean(game.prediction?.penaltiesPlayed),
+      penaltiesHome: game.prediction?.penaltiesHomeScore ?? '',
+      penaltiesAway: game.prediction?.penaltiesAwayScore ?? ''
     };
   }
 }
@@ -379,7 +385,13 @@ export async function savePrediction(gameId) {
   try {
     await api.put(`/predictions/games/${gameId}`, {
       homeScore: draft.home === '' ? '' : Number(draft.home),
-      awayScore: draft.away === '' ? '' : Number(draft.away)
+      awayScore: draft.away === '' ? '' : Number(draft.away),
+      extraTimePlayed: Boolean(draft.extraTimePlayed),
+      extraHomeScore: draft.extraTimePlayed && draft.extraHome !== '' ? Number(draft.extraHome) : '',
+      extraAwayScore: draft.extraTimePlayed && draft.extraAway !== '' ? Number(draft.extraAway) : '',
+      penaltiesPlayed: Boolean(draft.extraTimePlayed && draft.penaltiesPlayed),
+      penaltiesHomeScore: draft.extraTimePlayed && draft.penaltiesPlayed && draft.penaltiesHome !== '' ? Number(draft.penaltiesHome) : '',
+      penaltiesAwayScore: draft.extraTimePlayed && draft.penaltiesPlayed && draft.penaltiesAway !== '' ? Number(draft.penaltiesAway) : ''
     });
     predictionSaved[gameId] = true;
     setTimeout(() => { predictionSaved[gameId] = false; }, 2500);
@@ -391,11 +403,20 @@ export async function savePrediction(gameId) {
   }
 }
 
-export async function saveResult(gameId, homeScore, awayScore) {
+export async function saveResult(gameId, result) {
   loading.value = true;
   setStatus();
   try {
-    const { data } = await api.put(`/predictions/games/${gameId}/result`, { homeScore, awayScore });
+    const { data } = await api.put(`/predictions/games/${gameId}/result`, {
+      homeScore: result.home === '' ? '' : Number(result.home),
+      awayScore: result.away === '' ? '' : Number(result.away),
+      extraTimePlayed: Boolean(result.extraTimePlayed),
+      extraHomeScore: result.extraTimePlayed && result.extraHome !== '' ? Number(result.extraHome) : '',
+      extraAwayScore: result.extraTimePlayed && result.extraAway !== '' ? Number(result.extraAway) : '',
+      penaltiesPlayed: Boolean(result.extraTimePlayed && result.penaltiesPlayed),
+      penaltiesHomeScore: result.extraTimePlayed && result.penaltiesPlayed && result.penaltiesHome !== '' ? Number(result.penaltiesHome) : '',
+      penaltiesAwayScore: result.extraTimePlayed && result.penaltiesPlayed && result.penaltiesAway !== '' ? Number(result.penaltiesAway) : ''
+    });
     setStatus(data.message);
     await fetchPredictions();
     await fetchGroupStandings();

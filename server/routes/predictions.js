@@ -4,6 +4,103 @@ import { query } from '../db.js';
 
 const router = express.Router();
 
+function parseBooleanFlag(value) {
+  return value === true || value === 1 || value === '1' || value === 'true';
+}
+
+function parseOptionalScore(value) {
+  if (value === '' || value == null) return null;
+  if (!Number.isInteger(Number(value))) return NaN;
+  return Number(value);
+}
+
+function validateKnockoutPayload(stage, payload) {
+  if (stage === 'group') {
+    return {
+      extraTimePlayed: false,
+      extraHomeScore: null,
+      extraAwayScore: null,
+      penaltiesPlayed: false,
+      penaltiesHomeScore: null,
+      penaltiesAwayScore: null,
+    };
+  }
+
+  const extraTimePlayed = parseBooleanFlag(payload.extraTimePlayed);
+  const penaltiesPlayed = parseBooleanFlag(payload.penaltiesPlayed);
+  const extraHomeScore = parseOptionalScore(payload.extraHomeScore);
+  const extraAwayScore = parseOptionalScore(payload.extraAwayScore);
+  const penaltiesHomeScore = parseOptionalScore(payload.penaltiesHomeScore);
+  const penaltiesAwayScore = parseOptionalScore(payload.penaltiesAwayScore);
+
+  if (!extraTimePlayed && penaltiesPlayed) {
+    return { error: 'Penalty shootouts require extra time.' };
+  }
+
+  if (extraTimePlayed && (Number.isNaN(extraHomeScore) || Number.isNaN(extraAwayScore))) {
+    return { error: 'extraHomeScore and extraAwayScore must be integers when extra time is selected.' };
+  }
+
+  if (!extraTimePlayed && (extraHomeScore != null || extraAwayScore != null)) {
+    return { error: 'Extra-time scores can only be set when extra time is selected.' };
+  }
+
+  if (penaltiesPlayed && (Number.isNaN(penaltiesHomeScore) || Number.isNaN(penaltiesAwayScore))) {
+    return { error: 'penaltiesHomeScore and penaltiesAwayScore must be integers when penalties are selected.' };
+  }
+
+  if (!penaltiesPlayed && (penaltiesHomeScore != null || penaltiesAwayScore != null)) {
+    return { error: 'Penalty scores can only be set when penalties are selected.' };
+  }
+
+  const allScores = [extraHomeScore, extraAwayScore, penaltiesHomeScore, penaltiesAwayScore]
+    .filter((value) => value != null);
+
+  if (allScores.some((value) => value < 0 || value > 20)) {
+    return { error: 'Knockout scores must be between 0 and 20.' };
+  }
+
+  return {
+    extraTimePlayed,
+    extraHomeScore: extraTimePlayed ? extraHomeScore : null,
+    extraAwayScore: extraTimePlayed ? extraAwayScore : null,
+    penaltiesPlayed,
+    penaltiesHomeScore: penaltiesPlayed ? penaltiesHomeScore : null,
+    penaltiesAwayScore: penaltiesPlayed ? penaltiesAwayScore : null,
+  };
+}
+
+function determineKnockoutOutcome(result) {
+  if (result.penaltiesPlayed) {
+    return Math.sign(result.penaltiesHomeScore - result.penaltiesAwayScore);
+  }
+  if (result.extraTimePlayed) {
+    return Math.sign(result.extraHomeScore - result.extraAwayScore);
+  }
+  return Math.sign(result.homeScore - result.awayScore);
+}
+
+function calcPredictionPoints(prediction, actual, stage) {
+  if (stage === 'group') {
+    if (prediction.homeScore === actual.homeScore && prediction.awayScore === actual.awayScore) return 3;
+    return Math.sign(prediction.homeScore - prediction.awayScore) === Math.sign(actual.homeScore - actual.awayScore) ? 1 : 0;
+  }
+
+  const exact =
+    prediction.homeScore === actual.homeScore &&
+    prediction.awayScore === actual.awayScore &&
+    prediction.extraTimePlayed === actual.extraTimePlayed &&
+    prediction.extraHomeScore === actual.extraHomeScore &&
+    prediction.extraAwayScore === actual.extraAwayScore &&
+    prediction.penaltiesPlayed === actual.penaltiesPlayed &&
+    prediction.penaltiesHomeScore === actual.penaltiesHomeScore &&
+    prediction.penaltiesAwayScore === actual.penaltiesAwayScore;
+
+  if (exact) return 3;
+
+  return determineKnockoutOutcome(prediction) === determineKnockoutOutcome(actual) ? 1 : 0;
+}
+
 // GET /api/predictions/upcoming
 // Returns games for the next calendar date (UTC) that has fixtures, or today's games if any exist.
 router.get('/upcoming', async (req, res) => {
@@ -87,7 +184,8 @@ router.get('/standings', async (req, res) => {
 router.get('/games', attachOptionalAuth, async (req, res) => {
   const games = await query(
     `SELECT id, match_number, group_name, stage, home_team, away_team, starts_at, venue, city,
-            actual_home, actual_away
+            actual_home, actual_away, actual_extra_time_played, actual_extra_home, actual_extra_away,
+            actual_penalties_played, actual_penalties_home, actual_penalties_away
      FROM wc_games
      ORDER BY starts_at ASC, match_number ASC`
   );
@@ -95,7 +193,10 @@ router.get('/games', attachOptionalAuth, async (req, res) => {
   let userPredictions = [];
   if (req.user?.id) {
     userPredictions = await query(
-      'SELECT game_id, home_score, away_score, points FROM predictions WHERE user_id = ?',
+      `SELECT game_id, home_score, away_score, extra_time_played, extra_home_score, extra_away_score,
+              penalties_played, penalties_home_score, penalties_away_score, points
+       FROM predictions
+       WHERE user_id = ?`,
       [req.user.id]
     );
   }
@@ -105,6 +206,12 @@ router.get('/games', attachOptionalAuth, async (req, res) => {
     predictionMap[Number(p.game_id)] = {
       homeScore: Number(p.home_score),
       awayScore: Number(p.away_score),
+      extraTimePlayed: Boolean(p.extra_time_played),
+      extraHomeScore: p.extra_home_score != null ? Number(p.extra_home_score) : null,
+      extraAwayScore: p.extra_away_score != null ? Number(p.extra_away_score) : null,
+      penaltiesPlayed: Boolean(p.penalties_played),
+      penaltiesHomeScore: p.penalties_home_score != null ? Number(p.penalties_home_score) : null,
+      penaltiesAwayScore: p.penalties_away_score != null ? Number(p.penalties_away_score) : null,
       points: p.points != null ? Number(p.points) : null
     };
   }
@@ -122,6 +229,12 @@ router.get('/games', attachOptionalAuth, async (req, res) => {
       city: g.city,
       actualHome: g.actual_home != null ? Number(g.actual_home) : null,
       actualAway: g.actual_away != null ? Number(g.actual_away) : null,
+      actualExtraTimePlayed: Boolean(g.actual_extra_time_played),
+      actualExtraHome: g.actual_extra_home != null ? Number(g.actual_extra_home) : null,
+      actualExtraAway: g.actual_extra_away != null ? Number(g.actual_extra_away) : null,
+      actualPenaltiesPlayed: Boolean(g.actual_penalties_played),
+      actualPenaltiesHome: g.actual_penalties_home != null ? Number(g.actual_penalties_home) : null,
+      actualPenaltiesAway: g.actual_penalties_away != null ? Number(g.actual_penalties_away) : null,
       prediction: predictionMap[Number(g.id)] ?? null
     }))
   });
@@ -155,7 +268,10 @@ router.get('/leaderboard', async (req, res) => {
 // Upsert a score prediction for a fixture. Game must not have started yet.
 router.put('/games/:id', requireAuth, async (req, res) => {
   const gameId = Number(req.params.id);
-  const { homeScore, awayScore } = req.body;
+  const {
+    homeScore, awayScore, extraTimePlayed, extraHomeScore, extraAwayScore,
+    penaltiesPlayed, penaltiesHomeScore, penaltiesAwayScore
+  } = req.body;
   const isClearingPrediction = homeScore === '' && awayScore === '';
 
   if (!gameId) {
@@ -169,7 +285,7 @@ router.put('/games/:id', requireAuth, async (req, res) => {
   }
 
   const games = await query(
-    'SELECT id, starts_at FROM wc_games WHERE id = ? LIMIT 1',
+    'SELECT id, starts_at, stage FROM wc_games WHERE id = ? LIMIT 1',
     [gameId]
   );
 
@@ -192,16 +308,51 @@ router.put('/games/:id', requireAuth, async (req, res) => {
 
   const home = Number(homeScore);
   const away = Number(awayScore);
+  const game = games[0];
+  const knockoutFields = validateKnockoutPayload(game.stage, {
+    extraTimePlayed,
+    extraHomeScore,
+    extraAwayScore,
+    penaltiesPlayed,
+    penaltiesHomeScore,
+    penaltiesAwayScore,
+  });
 
   if (home < 0 || home > 20 || away < 0 || away > 20) {
     return res.status(400).json({ message: 'Scores must be between 0 and 20.' });
   }
 
+  if (knockoutFields.error) {
+    return res.status(400).json({ message: knockoutFields.error });
+  }
+
   await query(
-    `INSERT INTO predictions (user_id, game_id, home_score, away_score)
-     VALUES (?, ?, ?, ?)
-     ON DUPLICATE KEY UPDATE home_score = VALUES(home_score), away_score = VALUES(away_score)`,
-    [req.user.id, gameId, home, away]
+    `INSERT INTO predictions (
+       user_id, game_id, home_score, away_score, extra_time_played, extra_home_score, extra_away_score,
+       penalties_played, penalties_home_score, penalties_away_score
+     )
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON DUPLICATE KEY UPDATE
+       home_score = VALUES(home_score),
+       away_score = VALUES(away_score),
+       extra_time_played = VALUES(extra_time_played),
+       extra_home_score = VALUES(extra_home_score),
+       extra_away_score = VALUES(extra_away_score),
+       penalties_played = VALUES(penalties_played),
+       penalties_home_score = VALUES(penalties_home_score),
+       penalties_away_score = VALUES(penalties_away_score)`,
+    [
+      req.user.id,
+      gameId,
+      home,
+      away,
+      knockoutFields.extraTimePlayed ? 1 : 0,
+      knockoutFields.extraHomeScore,
+      knockoutFields.extraAwayScore,
+      knockoutFields.penaltiesPlayed ? 1 : 0,
+      knockoutFields.penaltiesHomeScore,
+      knockoutFields.penaltiesAwayScore
+    ]
   );
 
   return res.json({ message: 'Prediction saved.' });
@@ -212,7 +363,10 @@ router.put('/games/:id', requireAuth, async (req, res) => {
 // Points: 3 for exact score, 1 for correct outcome, 0 otherwise.
 router.put('/games/:id/result', requireAdmin, async (req, res) => {
   const gameId = Number(req.params.id);
-  const { homeScore, awayScore } = req.body;
+  const {
+    homeScore, awayScore, extraTimePlayed, extraHomeScore, extraAwayScore,
+    penaltiesPlayed, penaltiesHomeScore, penaltiesAwayScore
+  } = req.body;
   const isClearingResult = homeScore === '' && awayScore === '';
   const isDevelopment =
     process.env.VITE_ENV === 'development' ||
@@ -225,7 +379,7 @@ router.put('/games/:id/result', requireAdmin, async (req, res) => {
     return res.status(400).json({ message: 'homeScore and awayScore must be integers.' });
   }
 
-  const games = await query('SELECT id, starts_at FROM wc_games WHERE id = ? LIMIT 1', [gameId]);
+  const games = await query('SELECT id, starts_at, stage FROM wc_games WHERE id = ? LIMIT 1', [gameId]);
   if (!games.length) return res.status(404).json({ message: 'Game not found.' });
 
   if (!isDevelopment && new Date(games[0].starts_at) > new Date()) {
@@ -233,13 +387,20 @@ router.put('/games/:id/result', requireAdmin, async (req, res) => {
   }
 
   const preds = await query(
-    'SELECT id, home_score, away_score FROM predictions WHERE game_id = ?',
+    `SELECT id, home_score, away_score, extra_time_played, extra_home_score, extra_away_score,
+            penalties_played, penalties_home_score, penalties_away_score
+     FROM predictions
+     WHERE game_id = ?`,
     [gameId]
   );
 
   if (isClearingResult) {
     await query(
-      'UPDATE wc_games SET actual_home = NULL, actual_away = NULL WHERE id = ?',
+      `UPDATE wc_games
+       SET actual_home = NULL, actual_away = NULL,
+           actual_extra_time_played = 0, actual_extra_home = NULL, actual_extra_away = NULL,
+           actual_penalties_played = 0, actual_penalties_home = NULL, actual_penalties_away = NULL
+       WHERE id = ?`,
       [gameId]
     );
 
@@ -250,23 +411,61 @@ router.put('/games/:id/result', requireAdmin, async (req, res) => {
     return res.json({ message: `Result cleared. ${preds.length} prediction(s) reset.` });
   }
 
-  const actual = { home: Number(homeScore), away: Number(awayScore) };
+  const actual = { homeScore: Number(homeScore), awayScore: Number(awayScore) };
+  const knockoutFields = validateKnockoutPayload(games[0].stage, {
+    extraTimePlayed,
+    extraHomeScore,
+    extraAwayScore,
+    penaltiesPlayed,
+    penaltiesHomeScore,
+    penaltiesAwayScore,
+  });
 
-  await query(
-    'UPDATE wc_games SET actual_home = ?, actual_away = ? WHERE id = ?',
-    [actual.home, actual.away, gameId]
-  );
-
-  function calcPoints(predHome, predAway) {
-    const pH = Number(predHome), pA = Number(predAway);
-    if (pH === actual.home && pA === actual.away) return 3;
-    const actualOutcome = Math.sign(actual.home - actual.away);
-    const predOutcome   = Math.sign(pH - pA);
-    return actualOutcome === predOutcome ? 1 : 0;
+  if (actual.homeScore < 0 || actual.homeScore > 20 || actual.awayScore < 0 || actual.awayScore > 20) {
+    return res.status(400).json({ message: 'Scores must be between 0 and 20.' });
   }
 
+  if (knockoutFields.error) {
+    return res.status(400).json({ message: knockoutFields.error });
+  }
+
+  actual.extraTimePlayed = knockoutFields.extraTimePlayed;
+  actual.extraHomeScore = knockoutFields.extraHomeScore;
+  actual.extraAwayScore = knockoutFields.extraAwayScore;
+  actual.penaltiesPlayed = knockoutFields.penaltiesPlayed;
+  actual.penaltiesHomeScore = knockoutFields.penaltiesHomeScore;
+  actual.penaltiesAwayScore = knockoutFields.penaltiesAwayScore;
+
+  await query(
+    `UPDATE wc_games
+     SET actual_home = ?, actual_away = ?, actual_extra_time_played = ?, actual_extra_home = ?, actual_extra_away = ?,
+         actual_penalties_played = ?, actual_penalties_home = ?, actual_penalties_away = ?
+     WHERE id = ?`,
+    [
+      actual.homeScore,
+      actual.awayScore,
+      actual.extraTimePlayed ? 1 : 0,
+      actual.extraHomeScore,
+      actual.extraAwayScore,
+      actual.penaltiesPlayed ? 1 : 0,
+      actual.penaltiesHomeScore,
+      actual.penaltiesAwayScore,
+      gameId
+    ]
+  );
+
   for (const p of preds) {
-    await query('UPDATE predictions SET points = ? WHERE id = ?', [calcPoints(p.home_score, p.away_score), p.id]);
+    const prediction = {
+      homeScore: Number(p.home_score),
+      awayScore: Number(p.away_score),
+      extraTimePlayed: Boolean(p.extra_time_played),
+      extraHomeScore: p.extra_home_score != null ? Number(p.extra_home_score) : null,
+      extraAwayScore: p.extra_away_score != null ? Number(p.extra_away_score) : null,
+      penaltiesPlayed: Boolean(p.penalties_played),
+      penaltiesHomeScore: p.penalties_home_score != null ? Number(p.penalties_home_score) : null,
+      penaltiesAwayScore: p.penalties_away_score != null ? Number(p.penalties_away_score) : null,
+    };
+    await query('UPDATE predictions SET points = ? WHERE id = ?', [calcPredictionPoints(prediction, actual, games[0].stage), p.id]);
   }
 
   return res.json({ message: `Result recorded. ${preds.length} prediction(s) scored.` });

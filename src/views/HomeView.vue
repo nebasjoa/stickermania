@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import CountryLabel from '../components/CountryLabel.vue';
@@ -8,8 +8,6 @@ import {
   homeMeetups,
   homeLeaderboard,
   homeRecentCollectors,
-  upcomingGames,
-  upcomingGamesDate,
   groupStandings,
   predictions
 } from '../store.js';
@@ -32,10 +30,32 @@ const KNOCKOUT_STAGE_LABELS = {
 
 const countdown = reactive({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: false });
 const activeTournamentTab = ref(TOURNAMENT_TABS.standings);
+const selectedMatchDate = ref('');
 const localKickoffTime = KICKOFF.toLocaleString(undefined, {
   weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   hour: '2-digit', minute: '2-digit', timeZoneName: 'short'
 });
+
+const allMatchDates = computed(() =>
+  [...new Set(predictions.value.map((game) => new Date(game.startsAt).toISOString().slice(0, 10)))]
+    .sort((a, b) => a.localeCompare(b))
+);
+
+const matchesByDate = computed(() => {
+  const grouped = {};
+  for (const game of predictions.value) {
+    const dateKey = new Date(game.startsAt).toISOString().slice(0, 10);
+    if (!grouped[dateKey]) grouped[dateKey] = [];
+    grouped[dateKey].push(game);
+  }
+  return grouped;
+});
+
+const selectedMatchDateIndex = computed(() => allMatchDates.value.indexOf(selectedMatchDate.value));
+
+const selectedMatches = computed(() =>
+  matchesByDate.value[selectedMatchDate.value] || []
+);
 
 const knockoutGamesByStage = computed(() => {
   const stages = {};
@@ -96,6 +116,38 @@ function formatMatchDate(dateStr) {
     weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC'
   });
 }
+
+function matchLabel(game) {
+  if (game.stage && game.stage !== 'group') {
+    return `${KNOCKOUT_STAGE_LABELS[game.stage] || 'Knockout'} - #${game.matchNumber}`;
+  }
+  return `Group ${game.group} - #${game.matchNumber}`;
+}
+
+function moveMatchDate(step) {
+  if (selectedMatchDateIndex.value < 0) return;
+  const nextIndex = selectedMatchDateIndex.value + step;
+  if (nextIndex < 0 || nextIndex >= allMatchDates.value.length) return;
+  selectedMatchDate.value = allMatchDates.value[nextIndex];
+}
+
+watch(
+  allMatchDates,
+  (dates) => {
+    if (!dates.length) {
+      selectedMatchDate.value = '';
+      return;
+    }
+
+    if (dates.includes(selectedMatchDate.value)) {
+      return;
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    selectedMatchDate.value = dates.find((date) => date >= today) || dates[0];
+  },
+  { immediate: true }
+);
 
 function knockoutScore(game) {
   if (game.actualHome == null) return 'vs';
@@ -161,17 +213,49 @@ onUnmounted(() => {
     </div>
   </section>
 
-  <section v-if="upcomingGames.length" class="card">
+  <section v-if="allMatchDates.length" class="card">
     <div class="card-top">
       <div>
         <p class="eyebrow">World Cup 2026</p>
-        <h2>Upcoming Matches - {{ formatMatchDate(upcomingGamesDate) }}</h2>
+        <h2>Matches - {{ formatMatchDate(selectedMatchDate) }}</h2>
       </div>
       <RouterLink to="/predictions" class="btn secondary">Predict</RouterLink>
     </div>
+    <div class="matches-carousel-toolbar">
+      <div class="matches-carousel-nav">
+        <button
+          type="button"
+          class="matches-carousel-arrow"
+          :disabled="selectedMatchDateIndex <= 0"
+          aria-label="Previous match date"
+          @click="moveMatchDate(-1)"
+        >
+          ‹
+        </button>
+        <button
+          type="button"
+          class="matches-carousel-arrow"
+          :disabled="selectedMatchDateIndex === -1 || selectedMatchDateIndex >= allMatchDates.length - 1"
+          aria-label="Next match date"
+          @click="moveMatchDate(1)"
+        >
+          ›
+        </button>
+      </div>
+
+      <label class="matches-date-picker">
+        <span>Date</span>
+        <input
+          v-model="selectedMatchDate"
+          type="date"
+          :min="allMatchDates[0]"
+          :max="allMatchDates[allMatchDates.length - 1]"
+        />
+      </label>
+    </div>
     <div class="matches-grid">
-      <article v-for="game in upcomingGames" :key="game.id" class="match-card">
-        <div class="match-group">Group {{ game.group }} - #{{ game.matchNumber }}</div>
+      <article v-for="game in selectedMatches" :key="game.id" class="match-card">
+        <div class="match-group">{{ matchLabel(game) }}</div>
         <div class="match-teams">
           <CountryLabel class="match-team home" :country="game.homeTeam" />
           <span class="match-sep">vs</span>
@@ -183,6 +267,9 @@ onUnmounted(() => {
         </div>
       </article>
     </div>
+    <p v-if="selectedMatchDate && !selectedMatches.length" class="home-panel-empty">
+      No games scheduled for {{ formatMatchDate(selectedMatchDate) }}.
+    </p>
   </section>
 
   <section v-if="Object.keys(groupStandings).length || orderedKnockoutStages.length" class="card stack">

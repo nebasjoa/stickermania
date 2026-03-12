@@ -74,7 +74,27 @@ function canSubmitPrediction(game) {
   const draft = predictionDrafts[game.id];
   const isEmpty = draft.home === '' && draft.away === '';
   const hasBothScores = draft.home !== '' && draft.away !== '';
-  return hasBothScores || (isEmpty && Boolean(game.prediction));
+  if (!hasBothScores && !(isEmpty && Boolean(game.prediction))) {
+    return false;
+  }
+
+  if (game.stage === 'group') {
+    return true;
+  }
+
+  if (draft.penaltiesPlayed && !draft.extraTimePlayed) {
+    return false;
+  }
+
+  if (draft.extraTimePlayed && (draft.extraHome === '' || draft.extraAway === '')) {
+    return false;
+  }
+
+  if (draft.penaltiesPlayed && (draft.penaltiesHome === '' || draft.penaltiesAway === '')) {
+    return false;
+  }
+
+  return true;
 }
 
 function predictionActionLabel(game) {
@@ -83,6 +103,41 @@ function predictionActionLabel(game) {
     return 'Clear';
   }
   return 'Save';
+}
+
+function handleExtraTimeToggle(gameId) {
+  const draft = predictionDrafts[gameId];
+  if (draft.extraTimePlayed) return;
+  draft.extraHome = '';
+  draft.extraAway = '';
+  draft.penaltiesPlayed = false;
+  draft.penaltiesHome = '';
+  draft.penaltiesAway = '';
+}
+
+function handlePenaltiesToggle(gameId) {
+  const draft = predictionDrafts[gameId];
+  if (draft.penaltiesPlayed) return;
+  draft.penaltiesHome = '';
+  draft.penaltiesAway = '';
+}
+
+function knockoutActualSummary(game) {
+  const parts = [];
+
+  if (game.actualHome != null) {
+    parts.push(`90': ${game.actualHome} - ${game.actualAway}`);
+  }
+
+  if (game.actualExtraTimePlayed && game.actualExtraHome != null) {
+    parts.push(`AET: ${game.actualExtraHome} - ${game.actualExtraAway}`);
+  }
+
+  if (game.actualPenaltiesPlayed && game.actualPenaltiesHome != null) {
+    parts.push(`Pens: ${game.actualPenaltiesHome} - ${game.actualPenaltiesAway}`);
+  }
+
+  return parts.join(' | ');
 }
 </script>
 
@@ -259,10 +314,74 @@ function predictionActionLabel(game) {
                   />
                 </div>
                 <div v-if="game.actualHome != null" class="actual-result">
-                  Final: {{ game.actualHome }} - {{ game.actualAway }}
+                  {{ knockoutActualSummary(game) }}
                 </div>
               </div>
               <CountryLabel class="pred-team away" :country="game.awayTeam" />
+            </div>
+
+            <div class="knockout-prediction-options">
+              <label class="knockout-toggle">
+                <input
+                  v-model="predictionDrafts[game.id].extraTimePlayed"
+                  type="checkbox"
+                  :disabled="isGameLocked(game) || !isAuthenticated"
+                  @change="handleExtraTimeToggle(game.id)"
+                />
+                <span>Extra time</span>
+              </label>
+
+              <div class="knockout-score-row" :class="{ disabled: !predictionDrafts[game.id].extraTimePlayed }">
+                <span class="knockout-score-label">After ET</span>
+                <div class="pred-scores">
+                  <input
+                    v-model="predictionDrafts[game.id].extraHome"
+                    type="number" min="0" max="20"
+                    class="score-input knockout-score-input"
+                    :disabled="!predictionDrafts[game.id].extraTimePlayed || isGameLocked(game) || !isAuthenticated"
+                    placeholder="-"
+                  />
+                  <span class="pred-sep">:</span>
+                  <input
+                    v-model="predictionDrafts[game.id].extraAway"
+                    type="number" min="0" max="20"
+                    class="score-input knockout-score-input"
+                    :disabled="!predictionDrafts[game.id].extraTimePlayed || isGameLocked(game) || !isAuthenticated"
+                    placeholder="-"
+                  />
+                </div>
+              </div>
+
+              <label class="knockout-toggle">
+                <input
+                  v-model="predictionDrafts[game.id].penaltiesPlayed"
+                  type="checkbox"
+                  :disabled="!predictionDrafts[game.id].extraTimePlayed || isGameLocked(game) || !isAuthenticated"
+                  @change="handlePenaltiesToggle(game.id)"
+                />
+                <span>Penalties</span>
+              </label>
+
+              <div class="knockout-score-row" :class="{ disabled: !predictionDrafts[game.id].penaltiesPlayed }">
+                <span class="knockout-score-label">Pens</span>
+                <div class="pred-scores">
+                  <input
+                    v-model="predictionDrafts[game.id].penaltiesHome"
+                    type="number" min="0" max="20"
+                    class="score-input knockout-score-input"
+                    :disabled="!predictionDrafts[game.id].penaltiesPlayed || isGameLocked(game) || !isAuthenticated"
+                    placeholder="-"
+                  />
+                  <span class="pred-sep">:</span>
+                  <input
+                    v-model="predictionDrafts[game.id].penaltiesAway"
+                    type="number" min="0" max="20"
+                    class="score-input knockout-score-input"
+                    :disabled="!predictionDrafts[game.id].penaltiesPlayed || isGameLocked(game) || !isAuthenticated"
+                    placeholder="-"
+                  />
+                </div>
+              </div>
             </div>
 
             <div class="prediction-footer">
