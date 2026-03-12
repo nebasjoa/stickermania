@@ -71,6 +71,67 @@ router.get('/', attachOptionalAuth, async (req, res) => {
   });
 });
 
+router.get('/:id', attachOptionalAuth, async (req, res) => {
+  const meetupId = Number(req.params.id);
+
+  if (!meetupId) {
+    return res.status(400).json({ message: 'Invalid meetup id.' });
+  }
+
+  const rows = await query(
+    `SELECT
+       m.id,
+       m.title,
+       m.description,
+       m.country,
+       m.city,
+       m.venue,
+       m.starts_at,
+       m.details,
+       m.creator_user_id,
+       u.username AS creator_username,
+       COUNT(DISTINCT ma.user_id) AS attendee_count
+     FROM meetups m
+     JOIN users u ON u.id = m.creator_user_id
+     LEFT JOIN meetup_attendees ma ON ma.meetup_id = m.id
+     WHERE m.id = ?
+     GROUP BY
+       m.id,
+       m.title,
+       m.description,
+       m.country,
+       m.city,
+       m.venue,
+       m.starts_at,
+       m.details,
+       m.creator_user_id,
+       u.username
+     LIMIT 1`,
+    [meetupId]
+  );
+
+  if (!rows.length) {
+    return res.status(404).json({ message: 'Meetup not found.' });
+  }
+
+  let isAttending = false;
+  if (req.user?.id) {
+    const attendanceRows = await query(
+      'SELECT 1 FROM meetup_attendees WHERE meetup_id = ? AND user_id = ? LIMIT 1',
+      [meetupId, req.user.id]
+    );
+    isAttending = attendanceRows.length > 0;
+  }
+
+  return res.json({
+    meetup: {
+      ...rows[0],
+      attendee_count: Number(rows[0].attendee_count),
+      isAttending
+    }
+  });
+});
+
 router.post('/', requireAuth, async (req, res) => {
   const {
     title,
@@ -100,7 +161,7 @@ router.post('/', requireAuth, async (req, res) => {
     return res.status(400).json({ message: `You can create up to ${MAX_MEETUPS_PER_USER} meetups.` });
   }
 
-  await query(
+  const result = await query(
     `INSERT INTO meetups
        (creator_user_id, title, description, country, city, venue, starts_at, details)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -116,7 +177,7 @@ router.post('/', requireAuth, async (req, res) => {
     ]
   );
 
-  return res.status(201).json({ message: 'Meetup created.' });
+  return res.status(201).json({ message: 'Meetup created.', meetupId: Number(result.insertId) });
 });
 
 router.post('/:id/attend', requireAuth, async (req, res) => {

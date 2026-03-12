@@ -357,8 +357,10 @@ export async function createMeetup() {
     setStatus(data.message);
     resetMeetupForm();
     await fetchMeetups();
+    return { id: data.meetupId };
   } catch (error) {
     setStatus('', error.response?.data?.message || 'Could not create meetup.');
+    return null;
   } finally {
     loading.value = false;
   }

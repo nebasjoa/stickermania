@@ -216,29 +216,25 @@ function knockoutActualSummary(game) {
 
         <div class="prediction-matchup">
           <CountryLabel class="pred-team home" :country="game.homeTeam" />
-          <div class="pred-score-stack">
-            <div class="pred-scores">
-              <input
-                v-model="predictionDrafts[game.id].home"
-                type="number" min="0" max="20"
-                class="score-input"
-                :disabled="isGameLocked(game) || !isAuthenticated"
-                placeholder="-"
-              />
-              <span class="pred-sep">:</span>
-              <input
-                v-model="predictionDrafts[game.id].away"
-                type="number" min="0" max="20"
-                class="score-input"
-                :disabled="isGameLocked(game) || !isAuthenticated"
-                placeholder="-"
-              />
-            </div>
-            <div v-if="game.actualHome != null" class="actual-result">
-              Final: {{ game.actualHome }} - {{ game.actualAway }}
-            </div>
-          </div>
+          <input
+            v-model="predictionDrafts[game.id].home"
+            type="number" min="0" max="20"
+            class="score-input home-score"
+            :disabled="isGameLocked(game) || !isAuthenticated"
+            placeholder="-"
+          />
+          <span class="pred-sep">:</span>
+          <input
+            v-model="predictionDrafts[game.id].away"
+            type="number" min="0" max="20"
+            class="score-input away-score"
+            :disabled="isGameLocked(game) || !isAuthenticated"
+            placeholder="-"
+          />
           <CountryLabel class="pred-team away" :country="game.awayTeam" />
+          <div v-if="game.actualHome != null" class="actual-result">
+            Final: {{ game.actualHome }} - {{ game.actualAway }}
+          </div>
         </div>
 
         <div class="prediction-footer">
@@ -295,29 +291,25 @@ function knockoutActualSummary(game) {
 
             <div class="prediction-matchup">
               <CountryLabel class="pred-team home" :country="game.homeTeam" />
-              <div class="pred-score-stack">
-                <div class="pred-scores">
-                  <input
-                    v-model="predictionDrafts[game.id].home"
-                    type="number" min="0" max="20"
-                    class="score-input"
-                    :disabled="isGameLocked(game) || !isAuthenticated"
-                    placeholder="-"
-                  />
-                  <span class="pred-sep">:</span>
-                  <input
-                    v-model="predictionDrafts[game.id].away"
-                    type="number" min="0" max="20"
-                    class="score-input"
-                    :disabled="isGameLocked(game) || !isAuthenticated"
-                    placeholder="-"
-                  />
-                </div>
-                <div v-if="game.actualHome != null" class="actual-result">
-                  {{ knockoutActualSummary(game) }}
-                </div>
-              </div>
+              <input
+                v-model="predictionDrafts[game.id].home"
+                type="number" min="0" max="20"
+                class="score-input home-score"
+                :disabled="isGameLocked(game) || !isAuthenticated"
+                placeholder="-"
+              />
+              <span class="pred-sep">:</span>
+              <input
+                v-model="predictionDrafts[game.id].away"
+                type="number" min="0" max="20"
+                class="score-input away-score"
+                :disabled="isGameLocked(game) || !isAuthenticated"
+                placeholder="-"
+              />
               <CountryLabel class="pred-team away" :country="game.awayTeam" />
+              <div v-if="game.actualHome != null" class="actual-result">
+                {{ knockoutActualSummary(game) }}
+              </div>
             </div>
 
             <div class="knockout-prediction-options">

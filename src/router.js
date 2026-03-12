@@ -4,6 +4,7 @@ import { i18n } from './i18n.js';
 import HomeView from './views/HomeView.vue';
 import SearchView from './views/SearchView.vue';
 import MeetupsView from './views/MeetupsView.vue';
+import MeetupDetailView from './views/MeetupDetailView.vue';
 import PredictionsView from './views/PredictionsView.vue';
 import PredictorLeaderboardView from './views/PredictorLeaderboardView.vue';
 import TradesView from './views/TradesView.vue';
@@ -18,6 +19,7 @@ const router = createRouter({
     { path: '/',            component: HomeView },
     { path: '/search',      component: SearchView },
     { path: '/meetups',     component: MeetupsView },
+    { path: '/meetups/:id(\\d+)', component: MeetupDetailView },
     { path: '/predictions', component: PredictionsView },
     { path: '/predictions/leaderboard', component: PredictorLeaderboardView },
     { path: '/trades',      component: TradesView, meta: { requiresAuth: true } },

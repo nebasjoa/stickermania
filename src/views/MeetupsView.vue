@@ -1,5 +1,6 @@
 <script setup>
 import { computed, watch } from 'vue';
+import { RouterLink, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import locations from '../data/locations.json';
 import CountrySelect from '../components/CountrySelect.vue';
@@ -10,6 +11,7 @@ import {
 } from '../store.js';
 
 const { t } = useI18n();
+const router = useRouter();
 
 const countryOptions = Object.keys(locations);
 const meetupFilterCityOptions = computed(() => locations[meetupFilterForm.country] || []);
@@ -27,6 +29,10 @@ function formatMeetupDate(iso) {
   return new Date(iso).toLocaleString();
 }
 
+function meetupPath(id) {
+  return `/meetups/${id}`;
+}
+
 async function searchMeetups() {
   loading.value = true;
   setStatus();
@@ -38,6 +44,17 @@ async function searchMeetups() {
   } finally {
     loading.value = false;
   }
+}
+
+async function submitMeetup() {
+  const createdMeetup = await createMeetup();
+  if (createdMeetup?.id) {
+    router.push(meetupPath(createdMeetup.id));
+  }
+}
+
+async function toggleAttendance(meetup) {
+  await toggleMeetupAttendance(meetup);
 }
 </script>
 
@@ -65,7 +82,7 @@ async function searchMeetups() {
 
     <article v-if="isAuthenticated" class="card">
       <h2>{{ t('meetupCreateTitle') }}</h2>
-      <form class="stack" @submit.prevent="createMeetup">
+      <form class="stack" @submit.prevent="submitMeetup">
         <input v-model="meetupForm.title" :placeholder="t('meetupTitle')" required />
         <textarea v-model="meetupForm.description" :placeholder="t('meetupDescription')" required></textarea>
         <CountrySelect
@@ -90,7 +107,10 @@ async function searchMeetups() {
       <article v-for="meetup in meetups" :key="meetup.id" class="card meetup-card">
         <div class="card-top">
           <div>
-            <h3>{{ meetup.title }}</h3>
+            <p class="eyebrow">Meetup #{{ meetup.id }}</p>
+            <h3>
+              <RouterLink class="meetup-link" :to="meetupPath(meetup.id)">{{ meetup.title }}</RouterLink>
+            </h3>
             <p><LocationLabel :city="meetup.city" :country="meetup.country" /></p>
           </div>
           <span class="status">{{ formatMeetupDate(meetup.starts_at) }}</span>
@@ -102,14 +122,17 @@ async function searchMeetups() {
           <span><strong>{{ t('meetupAttendees') }}:</strong> {{ meetup.attendee_count }}</span>
         </div>
         <p><strong>{{ t('meetupDetails') }}:</strong> {{ meetup.details || '-' }}</p>
-        <button
-          v-if="isAuthenticated"
-          type="button"
-          :class="{ secondary: meetup.isAttending }"
-          @click="toggleMeetupAttendance(meetup)"
-        >
-          {{ meetup.isAttending ? t('meetupCancelAttend') : t('meetupAttend') }}
-        </button>
+        <div class="meetup-card-actions">
+          <RouterLink class="btn secondary" :to="meetupPath(meetup.id)">Open meetup</RouterLink>
+          <button
+            v-if="isAuthenticated"
+            type="button"
+            :class="{ secondary: meetup.isAttending }"
+            @click="toggleAttendance(meetup)"
+          >
+            {{ meetup.isAttending ? t('meetupCancelAttend') : t('meetupAttend') }}
+          </button>
+        </div>
       </article>
       <article v-if="!meetups.length" class="card">
         <p>{{ t('meetupEmpty') }}</p>
