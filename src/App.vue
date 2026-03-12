@@ -74,14 +74,17 @@ onMounted(async () => {
   <div class="shell">
     <header class="navbar">
       <div>
-        <RouterLink class="brand" to="/">{{ t('appName') }}</RouterLink>
+        <RouterLink class="brand" to="/">
+          <img src="/src/assets/logo/logo.png" alt="World Cup Stuff" class="navbar-logo" />
+          <span class="brand-name">World Cup Stuff</span>
+        </RouterLink>
       </div>
 
       <nav class="nav-links">
         <RouterLink to="/">{{ t('navHome') }}</RouterLink>
         <RouterLink to="/search">{{ t('navSearch') }}</RouterLink>
         <RouterLink to="/meetups">{{ t('navMeetups') }}</RouterLink>
-        <RouterLink to="/predictions">Predictions</RouterLink>
+        <RouterLink to="/predictions">{{ t('navPredictions') }}</RouterLink>
         <RouterLink to="/trades">{{ t('navTrades') }}</RouterLink>
         <RouterLink to="/account">{{ t('navAccount') }}</RouterLink>
         <RouterLink v-if="isAdmin" to="/admin">Admin</RouterLink>
@@ -128,7 +131,7 @@ onMounted(async () => {
           <RouterLink to="/" @click="closeDrawer">{{ t('navHome') }}</RouterLink>
           <RouterLink to="/search" @click="closeDrawer">{{ t('navSearch') }}</RouterLink>
           <RouterLink to="/meetups" @click="closeDrawer">{{ t('navMeetups') }}</RouterLink>
-          <RouterLink to="/predictions" @click="closeDrawer">Predictions</RouterLink>
+          <RouterLink to="/predictions" @click="closeDrawer">{{ t('navPredictions') }}</RouterLink>
           <RouterLink to="/trades" @click="closeDrawer">{{ t('navTrades') }}</RouterLink>
           <RouterLink to="/account" @click="closeDrawer">{{ t('navAccount') }}</RouterLink>
           <RouterLink v-if="isAdmin" to="/admin" @click="closeDrawer">Admin</RouterLink>

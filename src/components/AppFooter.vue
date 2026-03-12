@@ -23,7 +23,7 @@ const browserTimeZone = computed(() => Intl.DateTimeFormat().resolvedOptions().t
         <div class="footer-links">
           <RouterLink to="/search">{{ t('navSearch') }}</RouterLink>
           <RouterLink to="/meetups">{{ t('navMeetups') }}</RouterLink>
-          <RouterLink to="/predictions">Predictions</RouterLink>
+          <RouterLink to="/predictions">{{ t('navPredictions') }}</RouterLink>
           <RouterLink to="/account">{{ t('navAccount') }}</RouterLink>
         </div>
       </nav>
