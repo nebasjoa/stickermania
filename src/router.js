@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { isAuthenticated, isAdmin } from './store.js';
+import { ensureAuthLoaded, isAuthenticated, isAdmin } from './store.js';
 import { i18n } from './i18n.js';
 import HomeView from './views/HomeView.vue';
 import SearchView from './views/SearchView.vue';
@@ -8,7 +8,9 @@ import MeetupDetailView from './views/MeetupDetailView.vue';
 import PredictionsView from './views/PredictionsView.vue';
 import PredictorLeaderboardView from './views/PredictorLeaderboardView.vue';
 import TradesView from './views/TradesView.vue';
-import AccountView from './views/AccountView.vue';
+import LoginView from './views/LoginView.vue';
+import RegisterView from './views/RegisterView.vue';
+import ProfileView from './views/ProfileView.vue';
 import AdminView from './views/AdminView.vue';
 
 const LOCALE_CODES = { en: 'en', de: 'de', rs: 'sr' };
@@ -23,7 +25,10 @@ const router = createRouter({
     { path: '/predictions', component: PredictionsView },
     { path: '/predictions/leaderboard', component: PredictorLeaderboardView },
     { path: '/trades',      component: TradesView, meta: { requiresAuth: true } },
-    { path: '/account',     component: AccountView },
+    { path: '/login',       component: LoginView, meta: { guestOnly: true } },
+    { path: '/register',    component: RegisterView, meta: { guestOnly: true } },
+    { path: '/profile',     component: ProfileView, meta: { requiresAuth: true } },
+    { path: '/account',     redirect: () => (isAuthenticated.value ? '/profile' : '/login') },
     { path: '/admin',       component: AdminView, meta: { requiresAuth: true, requiresAdmin: true } },
     { path: '/:lang(en|de|rs)', redirect: to => {
       i18n.global.locale.value = LOCALE_CODES[to.params.lang];
@@ -32,9 +37,14 @@ const router = createRouter({
   ]
 });
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
+  await ensureAuthLoaded();
+
   if (to.meta.requiresAuth && !isAuthenticated.value) {
-    return '/account';
+    return '/login';
+  }
+  if (to.meta.guestOnly && isAuthenticated.value) {
+    return '/profile';
   }
   if (to.meta.requiresAdmin && !isAdmin.value) {
     return '/';

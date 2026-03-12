@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n';
 import AppFooter from './components/AppFooter.vue';
 import {
   currentUser, errorMessage, isAdmin, message,
-  fetchGroupStandings, fetchHomeLeaderboard, fetchMe, fetchMeetups, fetchPredictions,
+  ensureAuthLoaded, fetchGroupStandings, fetchHomeLeaderboard, fetchMeetups, fetchPredictions,
   fetchRecentCollectors, fetchTrades, fetchUpcomingGames, handleLogout, handleVerify,
   isAuthenticated, setStatus, verificationToken
 } from './store.js';
@@ -54,12 +54,12 @@ onMounted(async () => {
   const token = params.get('verify');
   if (token) {
     verificationToken.value = token;
-    router.push('/account');
+    router.push('/login');
     await handleVerify(token);
-    window.history.replaceState({}, '', '/account');
+    window.history.replaceState({}, '', '/login');
   }
 
-  await fetchMe();
+  await ensureAuthLoaded();
   await fetchTrades();
   await fetchMeetups();
   await fetchPredictions();
@@ -81,13 +81,19 @@ onMounted(async () => {
       </div>
 
       <nav class="nav-links">
-        <RouterLink to="/">{{ t('navHome') }}</RouterLink>
-        <RouterLink to="/search">{{ t('navSearch') }}</RouterLink>
-        <RouterLink to="/meetups">{{ t('navMeetups') }}</RouterLink>
-        <RouterLink to="/predictions">{{ t('navPredictions') }}</RouterLink>
-        <RouterLink to="/trades">{{ t('navTrades') }}</RouterLink>
-        <RouterLink to="/account">{{ t('navAccount') }}</RouterLink>
-        <RouterLink v-if="isAdmin" to="/admin">Admin</RouterLink>
+        <div class="nav-links-primary">
+          <RouterLink to="/">{{ t('navHome') }}</RouterLink>
+          <RouterLink to="/search">{{ t('navSearch') }}</RouterLink>
+          <RouterLink to="/meetups">{{ t('navMeetups') }}</RouterLink>
+          <RouterLink to="/predictions">{{ t('navPredictions') }}</RouterLink>
+          <RouterLink to="/trades">{{ t('navTrades') }}</RouterLink>
+        </div>
+        <div class="nav-links-secondary">
+          <RouterLink v-if="isAuthenticated" to="/profile">{{ t('navProfile') }}</RouterLink>
+          <RouterLink v-else to="/login">{{ t('navLogin') }}</RouterLink>
+          <RouterLink v-if="!isAuthenticated" to="/register">{{ t('navRegister') }}</RouterLink>
+          <RouterLink v-if="isAdmin" to="/admin">Admin</RouterLink>
+        </div>
       </nav>
 
       <div class="toolbar">
@@ -133,7 +139,9 @@ onMounted(async () => {
           <RouterLink to="/meetups" @click="closeDrawer">{{ t('navMeetups') }}</RouterLink>
           <RouterLink to="/predictions" @click="closeDrawer">{{ t('navPredictions') }}</RouterLink>
           <RouterLink to="/trades" @click="closeDrawer">{{ t('navTrades') }}</RouterLink>
-          <RouterLink to="/account" @click="closeDrawer">{{ t('navAccount') }}</RouterLink>
+          <RouterLink v-if="isAuthenticated" to="/profile" @click="closeDrawer">{{ t('navProfile') }}</RouterLink>
+          <RouterLink v-else to="/login" @click="closeDrawer">{{ t('navLogin') }}</RouterLink>
+          <RouterLink v-if="!isAuthenticated" to="/register" @click="closeDrawer">{{ t('navRegister') }}</RouterLink>
           <RouterLink v-if="isAdmin" to="/admin" @click="closeDrawer">Admin</RouterLink>
           <hr class="drawer-divider" />
           <div v-if="isAuthenticated" class="drawer-user">

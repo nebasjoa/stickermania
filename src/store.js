@@ -6,6 +6,7 @@ export const currentUser = ref(null);
 export const loading = ref(false);
 export const message = ref('');
 export const errorMessage = ref('');
+export const authReady = ref(false);
 
 export const searchResults = ref([]);
 export const trades = ref([]);
@@ -42,6 +43,8 @@ export const meetupForm = reactive({
 
 export const activePredictionGroup = ref('A');
 export const activeKnockoutStage = ref('r32');
+
+let authBootstrapPromise = null;
 
 // ── Computed ──────────────────────────────────────────────────────────────────
 export const isAuthenticated = computed(() => Boolean(currentUser.value));
@@ -132,7 +135,22 @@ export async function fetchMe() {
     syncProfileForm(data.user);
   } catch {
     currentUser.value = null;
+  } finally {
+    authReady.value = true;
   }
+}
+
+export async function ensureAuthLoaded() {
+  if (authReady.value) {
+    return currentUser.value;
+  }
+  if (!authBootstrapPromise) {
+    authBootstrapPromise = fetchMe().finally(() => {
+      authBootstrapPromise = null;
+    });
+  }
+  await authBootstrapPromise;
+  return currentUser.value;
 }
 
 export async function fetchTrades() {
@@ -375,6 +393,56 @@ export async function toggleMeetupAttendance(meetup) {
     await fetchMeetups();
   } catch (error) {
     setStatus('', error.response?.data?.message || 'Could not update meetup attendance.');
+  } finally {
+    loading.value = false;
+  }
+}
+
+export async function exportPersonalData() {
+  loading.value = true;
+  setStatus();
+  try {
+    const response = await api.get('/users/me/export', { responseType: 'blob' });
+    const disposition = response.headers['content-disposition'] || '';
+    const match = disposition.match(/filename="([^"]+)"/);
+    const filename = match?.[1] || 'world-cup-stuff-export.json';
+    const url = URL.createObjectURL(response.data);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    setStatus('Your data export is ready.');
+    return true;
+  } catch (error) {
+    setStatus('', error.response?.data?.message || 'Could not export your data.');
+    return false;
+  } finally {
+    loading.value = false;
+  }
+}
+
+export async function deleteAccountPermanently() {
+  loading.value = true;
+  setStatus();
+  try {
+    const { data } = await api.delete('/users/me');
+    currentUser.value = null;
+    trades.value = [];
+    searchResults.value = [];
+    await fetchMeetups();
+    await fetchPredictions();
+    await fetchHomeLeaderboard();
+    await fetchRecentCollectors();
+    await fetchUpcomingGames();
+    await fetchGroupStandings();
+    setStatus(data.message);
+    return true;
+  } catch (error) {
+    setStatus('', error.response?.data?.message || 'Could not delete account.');
+    return false;
   } finally {
     loading.value = false;
   }

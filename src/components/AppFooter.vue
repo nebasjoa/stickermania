@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { currentUser } from '../store.js';
+import { currentUser, isAuthenticated } from '../store.js';
 
 const { t } = useI18n();
 
@@ -24,7 +24,9 @@ const browserTimeZone = computed(() => Intl.DateTimeFormat().resolvedOptions().t
           <RouterLink to="/search">{{ t('navSearch') }}</RouterLink>
           <RouterLink to="/meetups">{{ t('navMeetups') }}</RouterLink>
           <RouterLink to="/predictions">{{ t('navPredictions') }}</RouterLink>
-          <RouterLink to="/account">{{ t('navAccount') }}</RouterLink>
+          <RouterLink v-if="isAuthenticated" to="/profile">{{ t('navProfile') }}</RouterLink>
+          <RouterLink v-else to="/login">{{ t('navLogin') }}</RouterLink>
+          <RouterLink v-if="!isAuthenticated" to="/register">{{ t('navRegister') }}</RouterLink>
         </div>
       </nav>
 
