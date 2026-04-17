@@ -12,7 +12,7 @@ const { t } = useI18n();
 const router = useRouter();
 const showDeleteAccountModal = ref(false);
 
-const stickerNumbers = Array.from({ length: 600 }, (_, i) => String(i + 1));
+const stickerNumbers = Array.from({ length: 980 }, (_, i) => String(i + 1));
 const totalStickerCount = stickerNumbers.length;
 const countryOptions = Object.keys(locations).sort((a, b) => a.localeCompare(b));
 const collectedStickerCount = computed(() => totalStickerCount - profileForm.needs.length);

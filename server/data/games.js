@@ -1,21 +1,21 @@
 // All 72 FIFA World Cup 2026 group stage fixtures.
 // Kickoff times stored in UTC (source times were EDT = UTC-4).
 export const games = [
-  // ── Group A: Mexico · South Africa · Korea Republic · Playoff D ──────────
+  // ── Group A: Mexico · South Africa · Korea Republic · Czechia ───────────
   { matchNumber: 1,  group: 'A', homeTeam: 'Mexico',           awayTeam: 'South Africa',    startsAt: '2026-06-11T19:00:00Z', venue: 'Estadio Azteca',           city: 'Mexico City' },
-  { matchNumber: 2,  group: 'A', homeTeam: 'Korea Republic',   awayTeam: 'Playoff D',        startsAt: '2026-06-12T02:00:00Z', venue: 'Estadio Akron',            city: 'Guadalajara' },
-  { matchNumber: 19, group: 'A', homeTeam: 'Playoff D',        awayTeam: 'South Africa',    startsAt: '2026-06-18T16:00:00Z', venue: 'Mercedes-Benz Stadium',    city: 'Atlanta' },
+  { matchNumber: 2,  group: 'A', homeTeam: 'Korea Republic',   awayTeam: 'Czechia',          startsAt: '2026-06-12T02:00:00Z', venue: 'Estadio Akron',            city: 'Guadalajara' },
+  { matchNumber: 19, group: 'A', homeTeam: 'Czechia',          awayTeam: 'South Africa',    startsAt: '2026-06-18T16:00:00Z', venue: 'Mercedes-Benz Stadium',    city: 'Atlanta' },
   { matchNumber: 20, group: 'A', homeTeam: 'Mexico',           awayTeam: 'Korea Republic',  startsAt: '2026-06-19T01:00:00Z', venue: 'Estadio Akron',            city: 'Guadalajara' },
-  { matchNumber: 37, group: 'A', homeTeam: 'Playoff D',        awayTeam: 'Mexico',          startsAt: '2026-06-25T01:00:00Z', venue: 'Estadio Azteca',           city: 'Mexico City' },
+  { matchNumber: 37, group: 'A', homeTeam: 'Czechia',          awayTeam: 'Mexico',          startsAt: '2026-06-25T01:00:00Z', venue: 'Estadio Azteca',           city: 'Mexico City' },
   { matchNumber: 38, group: 'A', homeTeam: 'South Africa',     awayTeam: 'Korea Republic',  startsAt: '2026-06-25T01:00:00Z', venue: 'Estadio BBVA',             city: 'Monterrey' },
 
-  // ── Group B: Canada · Playoff A · Qatar · Switzerland ────────────────────
-  { matchNumber: 3,  group: 'B', homeTeam: 'Canada',           awayTeam: 'Playoff A',       startsAt: '2026-06-12T19:00:00Z', venue: 'BMO Field',                city: 'Toronto' },
-  { matchNumber: 4,  group: 'B', homeTeam: 'Qatar',            awayTeam: 'Switzerland',     startsAt: '2026-06-13T19:00:00Z', venue: "Levi's Stadium",           city: 'Santa Clara' },
-  { matchNumber: 21, group: 'B', homeTeam: 'Switzerland',      awayTeam: 'Playoff A',       startsAt: '2026-06-18T19:00:00Z', venue: 'SoFi Stadium',             city: 'Inglewood' },
-  { matchNumber: 22, group: 'B', homeTeam: 'Canada',           awayTeam: 'Qatar',           startsAt: '2026-06-18T22:00:00Z', venue: 'BC Place',                 city: 'Vancouver' },
-  { matchNumber: 39, group: 'B', homeTeam: 'Switzerland',      awayTeam: 'Canada',          startsAt: '2026-06-24T19:00:00Z', venue: 'BC Place',                 city: 'Vancouver' },
-  { matchNumber: 40, group: 'B', homeTeam: 'Playoff A',        awayTeam: 'Qatar',           startsAt: '2026-06-24T19:00:00Z', venue: 'Lumen Field',              city: 'Seattle' },
+  // ── Group B: Canada · Bosnia and Herzegovina · Qatar · Switzerland ───────
+  { matchNumber: 3,  group: 'B', homeTeam: 'Canada',                  awayTeam: 'Bosnia and Herzegovina', startsAt: '2026-06-12T19:00:00Z', venue: 'BMO Field',                city: 'Toronto' },
+  { matchNumber: 4,  group: 'B', homeTeam: 'Qatar',                   awayTeam: 'Switzerland',            startsAt: '2026-06-13T19:00:00Z', venue: "Levi's Stadium",           city: 'Santa Clara' },
+  { matchNumber: 21, group: 'B', homeTeam: 'Switzerland',             awayTeam: 'Bosnia and Herzegovina', startsAt: '2026-06-18T19:00:00Z', venue: 'SoFi Stadium',             city: 'Inglewood' },
+  { matchNumber: 22, group: 'B', homeTeam: 'Canada',                  awayTeam: 'Qatar',                  startsAt: '2026-06-18T22:00:00Z', venue: 'BC Place',                 city: 'Vancouver' },
+  { matchNumber: 39, group: 'B', homeTeam: 'Switzerland',             awayTeam: 'Canada',                 startsAt: '2026-06-24T19:00:00Z', venue: 'BC Place',                 city: 'Vancouver' },
+  { matchNumber: 40, group: 'B', homeTeam: 'Bosnia and Herzegovina',  awayTeam: 'Qatar',                  startsAt: '2026-06-24T19:00:00Z', venue: 'Lumen Field',              city: 'Seattle' },
 
   // ── Group C: Brazil · Morocco · Haiti · Scotland ─────────────────────────
   { matchNumber: 5,  group: 'C', homeTeam: 'Brazil',           awayTeam: 'Morocco',         startsAt: '2026-06-13T22:00:00Z', venue: 'MetLife Stadium',          city: 'East Rutherford' },
@@ -25,12 +25,12 @@ export const games = [
   { matchNumber: 41, group: 'C', homeTeam: 'Scotland',         awayTeam: 'Brazil',          startsAt: '2026-06-24T22:00:00Z', venue: 'Hard Rock Stadium',        city: 'Miami' },
   { matchNumber: 42, group: 'C', homeTeam: 'Morocco',          awayTeam: 'Haiti',           startsAt: '2026-06-24T22:00:00Z', venue: 'Mercedes-Benz Stadium',    city: 'Atlanta' },
 
-  // ── Group D: United States · Paraguay · Australia · Playoff C ────────────
+  // ── Group D: United States · Paraguay · Australia · Türkiye ─────────────
   { matchNumber: 7,  group: 'D', homeTeam: 'United States',    awayTeam: 'Paraguay',        startsAt: '2026-06-13T01:00:00Z', venue: 'SoFi Stadium',             city: 'Inglewood' },
-  { matchNumber: 8,  group: 'D', homeTeam: 'Australia',        awayTeam: 'Playoff C',       startsAt: '2026-06-13T04:00:00Z', venue: 'BC Place',                 city: 'Vancouver' },
-  { matchNumber: 25, group: 'D', homeTeam: 'Playoff C',        awayTeam: 'Paraguay',        startsAt: '2026-06-19T04:00:00Z', venue: "Levi's Stadium",           city: 'Santa Clara' },
+  { matchNumber: 8,  group: 'D', homeTeam: 'Australia',        awayTeam: 'Türkiye',         startsAt: '2026-06-13T04:00:00Z', venue: 'BC Place',                 city: 'Vancouver' },
+  { matchNumber: 25, group: 'D', homeTeam: 'Türkiye',          awayTeam: 'Paraguay',        startsAt: '2026-06-19T04:00:00Z', venue: "Levi's Stadium",           city: 'Santa Clara' },
   { matchNumber: 26, group: 'D', homeTeam: 'United States',    awayTeam: 'Australia',       startsAt: '2026-06-19T19:00:00Z', venue: 'Lumen Field',              city: 'Seattle' },
-  { matchNumber: 43, group: 'D', homeTeam: 'Playoff C',        awayTeam: 'United States',   startsAt: '2026-06-26T02:00:00Z', venue: 'SoFi Stadium',             city: 'Inglewood' },
+  { matchNumber: 43, group: 'D', homeTeam: 'Türkiye',          awayTeam: 'United States',   startsAt: '2026-06-26T02:00:00Z', venue: 'SoFi Stadium',             city: 'Inglewood' },
   { matchNumber: 44, group: 'D', homeTeam: 'Paraguay',         awayTeam: 'Australia',       startsAt: '2026-06-26T02:00:00Z', venue: "Levi's Stadium",           city: 'Santa Clara' },
 
   // ── Group E: Germany · Curaçao · Ivory Coast · Ecuador ───────────────────
@@ -41,12 +41,12 @@ export const games = [
   { matchNumber: 45, group: 'E', homeTeam: 'Curaçao',          awayTeam: 'Ivory Coast',     startsAt: '2026-06-25T20:00:00Z', venue: 'Lincoln Financial Field',  city: 'Philadelphia' },
   { matchNumber: 46, group: 'E', homeTeam: 'Ecuador',          awayTeam: 'Germany',         startsAt: '2026-06-25T20:00:00Z', venue: 'MetLife Stadium',          city: 'East Rutherford' },
 
-  // ── Group F: Netherlands · Japan · Playoff B · Tunisia ───────────────────
+  // ── Group F: Netherlands · Japan · Sweden · Tunisia ─────────────────────
   { matchNumber: 11, group: 'F', homeTeam: 'Netherlands',      awayTeam: 'Japan',           startsAt: '2026-06-14T20:00:00Z', venue: 'AT&T Stadium',             city: 'Arlington' },
-  { matchNumber: 12, group: 'F', homeTeam: 'Playoff B',        awayTeam: 'Tunisia',         startsAt: '2026-06-15T02:00:00Z', venue: 'Estadio BBVA',             city: 'Monterrey' },
-  { matchNumber: 29, group: 'F', homeTeam: 'Netherlands',      awayTeam: 'Playoff B',       startsAt: '2026-06-20T17:00:00Z', venue: 'NRG Stadium',              city: 'Houston' },
+  { matchNumber: 12, group: 'F', homeTeam: 'Sweden',           awayTeam: 'Tunisia',         startsAt: '2026-06-15T02:00:00Z', venue: 'Estadio BBVA',             city: 'Monterrey' },
+  { matchNumber: 29, group: 'F', homeTeam: 'Netherlands',      awayTeam: 'Sweden',          startsAt: '2026-06-20T17:00:00Z', venue: 'NRG Stadium',              city: 'Houston' },
   { matchNumber: 30, group: 'F', homeTeam: 'Tunisia',          awayTeam: 'Japan',           startsAt: '2026-06-20T04:00:00Z', venue: 'Estadio BBVA',             city: 'Monterrey' },
-  { matchNumber: 47, group: 'F', homeTeam: 'Japan',            awayTeam: 'Playoff B',       startsAt: '2026-06-25T23:00:00Z', venue: 'AT&T Stadium',             city: 'Arlington' },
+  { matchNumber: 47, group: 'F', homeTeam: 'Japan',            awayTeam: 'Sweden',          startsAt: '2026-06-25T23:00:00Z', venue: 'AT&T Stadium',             city: 'Arlington' },
   { matchNumber: 48, group: 'F', homeTeam: 'Tunisia',          awayTeam: 'Netherlands',     startsAt: '2026-06-25T23:00:00Z', venue: 'Arrowhead Stadium',        city: 'Kansas City' },
 
   // ── Group G: Belgium · Egypt · Iran · New Zealand ────────────────────────
@@ -65,13 +65,13 @@ export const games = [
   { matchNumber: 51, group: 'H', homeTeam: 'Cape Verde',       awayTeam: 'Saudi Arabia',    startsAt: '2026-06-27T00:00:00Z', venue: 'NRG Stadium',              city: 'Houston' },
   { matchNumber: 52, group: 'H', homeTeam: 'Uruguay',          awayTeam: 'Spain',           startsAt: '2026-06-27T00:00:00Z', venue: 'Estadio Akron',            city: 'Guadalajara' },
 
-  // ── Group I: France · Senegal · IC Playoff 2 · Norway ────────────────────
+  // ── Group I: France · Senegal · Iraq · Norway ────────────────────────────
   { matchNumber: 17, group: 'I', homeTeam: 'France',           awayTeam: 'Senegal',         startsAt: '2026-06-16T19:00:00Z', venue: 'MetLife Stadium',          city: 'East Rutherford' },
-  { matchNumber: 18, group: 'I', homeTeam: 'IC Playoff 2',     awayTeam: 'Norway',          startsAt: '2026-06-16T22:00:00Z', venue: 'Gillette Stadium',         city: 'Foxborough' },
-  { matchNumber: 35, group: 'I', homeTeam: 'France',           awayTeam: 'IC Playoff 2',    startsAt: '2026-06-22T21:00:00Z', venue: 'Lincoln Financial Field',  city: 'Philadelphia' },
+  { matchNumber: 18, group: 'I', homeTeam: 'Iraq',             awayTeam: 'Norway',          startsAt: '2026-06-16T22:00:00Z', venue: 'Gillette Stadium',         city: 'Foxborough' },
+  { matchNumber: 35, group: 'I', homeTeam: 'France',           awayTeam: 'Iraq',            startsAt: '2026-06-22T21:00:00Z', venue: 'Lincoln Financial Field',  city: 'Philadelphia' },
   { matchNumber: 36, group: 'I', homeTeam: 'Norway',           awayTeam: 'Senegal',         startsAt: '2026-06-23T00:00:00Z', venue: 'MetLife Stadium',          city: 'East Rutherford' },
   { matchNumber: 53, group: 'I', homeTeam: 'Norway',           awayTeam: 'France',          startsAt: '2026-06-26T19:00:00Z', venue: 'Gillette Stadium',         city: 'Foxborough' },
-  { matchNumber: 54, group: 'I', homeTeam: 'Senegal',          awayTeam: 'IC Playoff 2',    startsAt: '2026-06-26T19:00:00Z', venue: 'BMO Field',                city: 'Toronto' },
+  { matchNumber: 54, group: 'I', homeTeam: 'Senegal',          awayTeam: 'Iraq',            startsAt: '2026-06-26T19:00:00Z', venue: 'BMO Field',                city: 'Toronto' },
 
   // ── Group J: Argentina · Algeria · Austria · Jordan ──────────────────────
   { matchNumber: 55, group: 'J', homeTeam: 'Argentina',        awayTeam: 'Algeria',         startsAt: '2026-06-17T01:00:00Z', venue: 'Arrowhead Stadium',        city: 'Kansas City' },
@@ -81,13 +81,13 @@ export const games = [
   { matchNumber: 59, group: 'J', homeTeam: 'Jordan',           awayTeam: 'Argentina',       startsAt: '2026-06-28T02:00:00Z', venue: 'AT&T Stadium',             city: 'Arlington' },
   { matchNumber: 60, group: 'J', homeTeam: 'Algeria',          awayTeam: 'Austria',         startsAt: '2026-06-28T02:00:00Z', venue: 'Arrowhead Stadium',        city: 'Kansas City' },
 
-  // ── Group K: Portugal · IC Playoff 1 · Uzbekistan · Colombia ─────────────
-  { matchNumber: 61, group: 'K', homeTeam: 'Portugal',         awayTeam: 'IC Playoff 1',    startsAt: '2026-06-17T17:00:00Z', venue: 'NRG Stadium',              city: 'Houston' },
+  // ── Group K: Portugal · DR Congo · Uzbekistan · Colombia ────────────────
+  { matchNumber: 61, group: 'K', homeTeam: 'Portugal',         awayTeam: 'DR Congo',        startsAt: '2026-06-17T17:00:00Z', venue: 'NRG Stadium',              city: 'Houston' },
   { matchNumber: 62, group: 'K', homeTeam: 'Uzbekistan',       awayTeam: 'Colombia',        startsAt: '2026-06-18T02:00:00Z', venue: 'Estadio Azteca',           city: 'Mexico City' },
   { matchNumber: 63, group: 'K', homeTeam: 'Portugal',         awayTeam: 'Uzbekistan',      startsAt: '2026-06-23T17:00:00Z', venue: 'NRG Stadium',              city: 'Houston' },
-  { matchNumber: 64, group: 'K', homeTeam: 'Colombia',         awayTeam: 'IC Playoff 1',    startsAt: '2026-06-24T02:00:00Z', venue: 'Estadio Akron',            city: 'Guadalajara' },
+  { matchNumber: 64, group: 'K', homeTeam: 'Colombia',         awayTeam: 'DR Congo',        startsAt: '2026-06-24T02:00:00Z', venue: 'Estadio Akron',            city: 'Guadalajara' },
   { matchNumber: 65, group: 'K', homeTeam: 'Colombia',         awayTeam: 'Portugal',        startsAt: '2026-06-27T23:30:00Z', venue: 'Hard Rock Stadium',        city: 'Miami' },
-  { matchNumber: 66, group: 'K', homeTeam: 'IC Playoff 1',     awayTeam: 'Uzbekistan',      startsAt: '2026-06-27T23:30:00Z', venue: 'Mercedes-Benz Stadium',    city: 'Atlanta' },
+  { matchNumber: 66, group: 'K', homeTeam: 'DR Congo',         awayTeam: 'Uzbekistan',      startsAt: '2026-06-27T23:30:00Z', venue: 'Mercedes-Benz Stadium',    city: 'Atlanta' },
 
   // ── Group L: England · Croatia · Ghana · Panama ───────────────────────────
   { matchNumber: 67, group: 'L', homeTeam: 'England',          awayTeam: 'Croatia',         startsAt: '2026-06-17T20:00:00Z', venue: 'AT&T Stadium',             city: 'Arlington' },

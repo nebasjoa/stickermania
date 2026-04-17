@@ -16,7 +16,7 @@ const route = useRoute();
 const router = useRouter();
 const showDeleteAccountModal = ref(false);
 
-const stickerNumbers = Array.from({ length: 600 }, (_, i) => String(i + 1));
+const stickerNumbers = Array.from({ length: 980 }, (_, i) => String(i + 1));
 const registerRepeatPassword = ref('');
 const totalStickerCount = stickerNumbers.length;
 

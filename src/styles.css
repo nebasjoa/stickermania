@@ -668,6 +668,35 @@ small {
   text-transform: uppercase;
 }
 
+.panini-promo {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.panini-logo {
+  height: 40px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.panini-promo-text {
+  flex: 1;
+  min-width: 200px;
+}
+
+.panini-promo-text h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+}
+
+.panini-promo-text p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
 .hero-grid,
 .results-grid {
   display: grid;

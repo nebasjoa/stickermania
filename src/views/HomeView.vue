@@ -213,6 +213,15 @@ onUnmounted(() => {
     </div>
   </section>
 
+  <section class="panini-promo card">
+    <img src="https://paninistore.com/media/logo/Panini.png" alt="Panini" class="panini-logo" />
+    <div class="panini-promo-text">
+      <h2>Get the Official Album</h2>
+      <p>Order the official Panini FIFA World Cup 2026™ sticker album and starter pack.</p>
+    </div>
+    <a href="https://paninistore.com/shp_int_en/catalog/category/view/s/albums-stickers-and-cards/id/12721/" target="_blank" rel="noopener noreferrer" class="btn">Shop Panini</a>
+  </section>
+
   <section v-if="allMatchDates.length" class="card">
     <div class="card-top">
       <div>

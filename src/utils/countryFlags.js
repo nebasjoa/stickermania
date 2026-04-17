@@ -44,7 +44,12 @@ const COUNTRY_FLAG_CODES = {
   Uzbekistan: 'uz',
   'United States': 'us',
   'New Zealand': 'nz',
-  'Cape Verde': 'cv'
+  'Cape Verde': 'cv',
+  Sweden: 'se',
+  'Türkiye': 'tr',
+  Czechia: 'cz',
+  'Bosnia and Herzegovina': 'ba',
+  'DR Congo': 'cd'
 };
 
 export function getCountryFlagCode(country) {
