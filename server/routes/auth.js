@@ -2,7 +2,7 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import { query } from '../db.js';
 import { clearAuthCookie, requireAuth, setAuthCookie } from '../auth.js';
-import { sendVerificationEmail } from '../mailer.js';
+import { sendPasswordResetEmail, sendVerificationEmail } from '../mailer.js';
 import { createVerificationToken, normalizeStickerNumbers } from '../utils.js';
 
 const router = express.Router();
@@ -142,6 +142,75 @@ router.post('/login', async (req, res) => {
       isAdmin: Boolean(user.is_admin)
     }
   });
+});
+
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required.' });
+  }
+
+  const users = await query(
+    'SELECT id, username, email FROM users WHERE email = ? AND is_verified = 1 LIMIT 1',
+    [email.trim().toLowerCase()]
+  );
+
+  // Always return the same response to avoid leaking whether an email is registered
+  if (!users.length) {
+    return res.json({ message: 'If that email is registered, a reset link has been sent.' });
+  }
+
+  const user = users[0];
+  const token = createVerificationToken();
+
+  await query('DELETE FROM password_reset_tokens WHERE user_id = ?', [user.id]);
+  await query('INSERT INTO password_reset_tokens (user_id, token) VALUES (?, ?)', [user.id, token]);
+
+  const emailResult = await sendPasswordResetEmail({ email: user.email, username: user.username, token });
+
+  return res.json({
+    message: 'If that email is registered, a reset link has been sent.',
+    resetToken: emailResult.delivered ? undefined : token
+  });
+});
+
+router.post('/reset-password', async (req, res) => {
+  const { token, password } = req.body;
+
+  if (!token || !password) {
+    return res.status(400).json({ message: 'Token and new password are required.' });
+  }
+
+  if (password.length < 8) {
+    return res.status(400).json({ message: 'Password must be at least 8 characters.' });
+  }
+
+  const tokens = await query(
+    `SELECT prt.id, prt.user_id, prt.created_at, u.username, u.email
+     FROM password_reset_tokens prt
+     JOIN users u ON u.id = prt.user_id
+     WHERE prt.token = ?
+     LIMIT 1`,
+    [token]
+  );
+
+  if (!tokens.length) {
+    return res.status(404).json({ message: 'Invalid or expired reset token.' });
+  }
+
+  const record = tokens[0];
+  const ageMs = Date.now() - new Date(record.created_at).getTime();
+  if (ageMs > 60 * 60 * 1000) {
+    await query('DELETE FROM password_reset_tokens WHERE id = ?', [record.id]);
+    return res.status(410).json({ message: 'Reset token has expired. Please request a new one.' });
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
+  await query('UPDATE users SET password_hash = ? WHERE id = ?', [passwordHash, record.user_id]);
+  await query('DELETE FROM password_reset_tokens WHERE user_id = ?', [record.user_id]);
+
+  return res.json({ message: 'Password updated successfully. You can now log in.' });
 });
 
 router.post('/logout', (_req, res) => {

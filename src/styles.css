@@ -343,6 +343,33 @@ textarea {
   color: var(--danger-text);
 }
 
+.form-hint {
+  margin: -0.25rem 0 0.25rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-top: 0.75rem;
+  color: var(--accent);
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  display: inline;
+}
+
+.btn-link:hover:not(:disabled),
+.btn-link:active:not(:disabled) {
+  background: none;
+  transform: none;
+  box-shadow: none;
+  color: var(--accent-hover);
+}
+
 /* ── Shell ──────────────────────────────────────────────── */
 
 .shell {

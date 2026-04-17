@@ -126,6 +126,15 @@ ALTER TABLE trade_requests ADD COLUMN postal_address VARCHAR(255) NOT NULL DEFAU
 ALTER TABLE trade_requests ADD COLUMN recipient_full_name VARCHAR(160) NOT NULL DEFAULT '';
 ALTER TABLE trade_requests ADD COLUMN recipient_postal_address VARCHAR(255) NOT NULL DEFAULT '';
 
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  token VARCHAR(120) NOT NULL UNIQUE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_password_reset_user
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS meetup_attendees (
   id INT PRIMARY KEY AUTO_INCREMENT,
   meetup_id INT NOT NULL,

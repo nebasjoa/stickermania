@@ -225,6 +225,39 @@ export async function handleVerify(token) {
   }
 }
 
+export async function handleForgotPassword(email) {
+  loading.value = true;
+  setStatus();
+  try {
+    const { data } = await api.post('/auth/forgot-password', { email });
+    const statusMsg = data.resetToken
+      ? `${data.message} (dev token: ${data.resetToken})`
+      : data.message;
+    setStatus(statusMsg);
+    return true;
+  } catch (error) {
+    setStatus('', error.response?.data?.message || 'Could not send reset email.');
+    return false;
+  } finally {
+    loading.value = false;
+  }
+}
+
+export async function handleResetPassword(token, password) {
+  loading.value = true;
+  setStatus();
+  try {
+    const { data } = await api.post('/auth/reset-password', { token, password });
+    setStatus(data.message);
+    return true;
+  } catch (error) {
+    setStatus('', error.response?.data?.message || 'Could not reset password.');
+    return false;
+  } finally {
+    loading.value = false;
+  }
+}
+
 export async function handleLogin() {
   loading.value = true;
   setStatus();

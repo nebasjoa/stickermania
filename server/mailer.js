@@ -46,6 +46,48 @@ export async function sendVerificationEmail({ email, username, token }) {
   return { delivered: true, skippedInDevelopment: false };
 }
 
+export async function sendPasswordResetEmail({ email, username, token }) {
+  if (isDevelopment) {
+    console.warn('Development mode detected. Resend password reset email skipped.');
+    return { delivered: false, skippedInDevelopment: true };
+  }
+
+  if (!resendApiKey || !fromEmail) {
+    console.warn('Resend is not configured. Password reset email skipped.');
+    return { delivered: false };
+  }
+
+  const resend = new Resend(resendApiKey);
+  const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+  const resetUrl = `${clientUrl}/login?reset=${token}`;
+
+  console.log(`[mailer] Sending password reset email to ${email} (user: ${username})`);
+
+  const result = await resend.emails.send({
+    from: fromEmail,
+    to: email,
+    subject: 'Reset your Stickermania password',
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+        <h2>Hello ${username},</h2>
+        <p>We received a request to reset your Stickermania password.</p>
+        <p><a href="${resetUrl}">Reset your password</a></p>
+        <p>This link expires in 1 hour. If you did not request a password reset, you can ignore this email.</p>
+        <p>If the link above does not work, open this URL in your browser:</p>
+        <p>${resetUrl}</p>
+      </div>
+    `
+  });
+
+  if (result.error) {
+    console.error(`[mailer] Resend password reset error for ${email}:`, result.error);
+    return { delivered: false, error: result.error };
+  }
+
+  console.log(`[mailer] Password reset email delivered to ${email}, id: ${result.data?.id}`);
+  return { delivered: true };
+}
+
 export async function sendTradeRequestEmail({
   email,
   targetUsername,
