@@ -12,6 +12,8 @@ import LoginView from './views/LoginView.vue';
 import RegisterView from './views/RegisterView.vue';
 import ProfileView from './views/ProfileView.vue';
 import AdminView from './views/AdminView.vue';
+import NewsView from './views/NewsView.vue';
+import NewsArticleView from './views/NewsArticleView.vue';
 
 const LOCALE_CODES = { en: 'en', de: 'de', rs: 'sr' };
 
@@ -30,6 +32,8 @@ const router = createRouter({
     { path: '/profile',     component: ProfileView, meta: { requiresAuth: true } },
     { path: '/account',     redirect: () => (isAuthenticated.value ? '/profile' : '/login') },
     { path: '/admin',       component: AdminView, meta: { requiresAuth: true, requiresAdmin: true } },
+    { path: '/news',        component: NewsView },
+    { path: '/news/:slug',  component: NewsArticleView },
     { path: '/:lang(en|de|rs)', redirect: to => {
       i18n.global.locale.value = LOCALE_CODES[to.params.lang];
       return '/';

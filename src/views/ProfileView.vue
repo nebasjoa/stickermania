@@ -176,12 +176,26 @@ function closeDeleteAccountModal() {
           </div>
         </details>
 
-        <label class="checkbox-row">
-          <input v-model="profileForm.postalTradeEnabled" type="checkbox" />
-          <span>{{ t('postalTrade') }}</span>
-        </label>
+        <div class="checkbox-row-wrap">
+          <label class="checkbox-row">
+            <input v-model="profileForm.postalTradeEnabled" type="checkbox" />
+            <span>{{ t('postalTrade') }}</span>
+          </label>
+          <span class="info-tip" :data-tip="t('postalTradeHelp')" aria-label="More information">
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M10 9v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <circle cx="10" cy="6.5" r="0.9" fill="currentColor"/>
+            </svg>
+          </span>
+        </div>
 
-        <button type="submit" :disabled="loading">{{ t('saveProfile') }}</button>
+        <button type="submit" :disabled="loading" class="btn-with-spinner">
+          <svg v-if="loading" class="btn-spinner" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="31.4 31.4" />
+          </svg>
+          {{ loading ? '' : t('saveProfile') }}
+        </button>
       </form>
     </article>
 

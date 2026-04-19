@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch, watchEffect } from 'vue';
 import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import AppFooter from './components/AppFooter.vue';
@@ -24,6 +24,26 @@ const langOptions = [
 const langDropdownOpen = ref(false);
 const currentLang = computed(() => langOptions.find(l => l.value === locale.value));
 const drawerOpen = ref(false);
+const toastVisible = ref(false);
+const toastText = ref('');
+const toastType = ref('success');
+let toastTimer = null;
+
+function showToast(text, type = 'success') {
+  clearTimeout(toastTimer);
+  toastText.value = text;
+  toastType.value = type;
+  toastVisible.value = true;
+  toastTimer = setTimeout(() => { toastVisible.value = false; }, 3500);
+}
+
+watchEffect(() => {
+  if (message.value) showToast(message.value, 'success');
+});
+
+watchEffect(() => {
+  if (errorMessage.value) showToast(errorMessage.value, 'error');
+});
 
 function closeDrawer() { drawerOpen.value = false; }
 
@@ -87,6 +107,7 @@ onMounted(async () => {
           <RouterLink to="/meetups">{{ t('navMeetups') }}</RouterLink>
           <RouterLink to="/predictions">{{ t('navPredictions') }}</RouterLink>
           <RouterLink to="/trades">{{ t('navTrades') }}</RouterLink>
+          <RouterLink to="/news">{{ t('navNews') }}</RouterLink>
         </div>
         <div class="nav-links-secondary">
           <RouterLink v-if="isAuthenticated" to="/profile">{{ t('navProfile') }}</RouterLink>
@@ -139,6 +160,7 @@ onMounted(async () => {
           <RouterLink to="/meetups" @click="closeDrawer">{{ t('navMeetups') }}</RouterLink>
           <RouterLink to="/predictions" @click="closeDrawer">{{ t('navPredictions') }}</RouterLink>
           <RouterLink to="/trades" @click="closeDrawer">{{ t('navTrades') }}</RouterLink>
+          <RouterLink to="/news" @click="closeDrawer">{{ t('navNews') }}</RouterLink>
           <RouterLink v-if="isAuthenticated" to="/profile" @click="closeDrawer">{{ t('navProfile') }}</RouterLink>
           <RouterLink v-else to="/login" @click="closeDrawer">{{ t('navLogin') }}</RouterLink>
           <RouterLink v-if="!isAuthenticated" to="/register" @click="closeDrawer">{{ t('navRegister') }}</RouterLink>
@@ -165,10 +187,14 @@ onMounted(async () => {
     </transition>
 
     <main class="main-content">
-      <section v-if="message" class="notice success">{{ message }}</section>
-      <section v-if="errorMessage" class="notice error">{{ errorMessage }}</section>
       <RouterView />
     </main>
+
+    <transition name="toast">
+      <div v-if="toastVisible" :class="['toast', toastType]" role="status" aria-live="polite">
+        {{ toastText }}
+      </div>
+    </transition>
 
     <AppFooter />
   </div>
