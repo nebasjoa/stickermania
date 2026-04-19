@@ -3146,3 +3146,119 @@ small {
   flex: 1;
   font-weight: 600;
 }
+
+/* ── Badges ─────────────────────────────────────────────────────────────── */
+.badges-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.badges-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.badges-subtitle {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.badges-earned-count {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.badges-category {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.badges-category-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-subtle);
+  margin: 0;
+}
+
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
+  gap: 0.75rem;
+}
+
+.badge-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0.75rem;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  background: var(--surface-muted);
+  text-align: center;
+  transition: border-color 0.12s;
+}
+
+.badge-card.earned {
+  border-color: transparent;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.badge-card.locked {
+  opacity: 0.45;
+}
+
+.badge-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.badge-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.badge-card.earned .badge-icon { background: var(--accent-soft); color: var(--accent); }
+.badge-card.locked .badge-icon  { background: var(--border); color: var(--text-subtle); }
+
+.badge-card.tier-platinum.earned .badge-icon { background: #f3f0ff; color: #7c3aed; }
+.badge-card.tier-gold.earned     .badge-icon { background: #fffbeb; color: #b45309; }
+.badge-card.tier-silver.earned   .badge-icon { background: #f0fdf4; color: #15803d; }
+.badge-card.tier-bronze.earned   .badge-icon { background: var(--accent-soft); color: var(--accent); }
+
+.badge-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.badge-card.locked .badge-name {
+  color: var(--text-subtle);
+}
+
+.badge-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.badge-card.locked .badge-desc {
+  color: var(--text-subtle);
+}

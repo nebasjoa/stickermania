@@ -4,13 +4,29 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import locations from '../data/locations.json';
 import CountrySelect from '../components/CountrySelect.vue';
+import { BADGES, computeEarnedBadges } from '../utils/badges.js';
 import {
-  completedPredictionsCount, deleteAccountPermanently, exportPersonalData, loading, predictions, profileForm, saveProfile
+  completedPredictionsCount, currentUser, deleteAccountPermanently, exportPersonalData,
+  loading, meetups, predictions, profileForm, saveProfile, trades
 } from '../store.js';
 
 const { t } = useI18n();
 const router = useRouter();
 const showDeleteAccountModal = ref(false);
+
+const earnedBadgeIds = computed(() => {
+  const earned = computeEarnedBadges(currentUser.value, trades.value, meetups.value, predictions.value);
+  return new Set(earned.map((b) => b.id));
+});
+
+const badgesByCategory = computed(() => {
+  const categories = ['collection', 'trading', 'community', 'predictions', 'account'];
+  return categories.map((cat) => ({
+    key: cat,
+    label: t(`badgeCategory${cat.charAt(0).toUpperCase() + cat.slice(1)}`),
+    badges: BADGES.filter((b) => b.category === cat),
+  }));
+});
 
 const stickerNumbers = Array.from({ length: 980 }, (_, i) => String(i + 1));
 const totalStickerCount = stickerNumbers.length;
@@ -197,6 +213,49 @@ function closeDeleteAccountModal() {
           {{ loading ? '' : t('saveProfile') }}
         </button>
       </form>
+    </article>
+
+    <article class="card">
+      <div class="badges-section">
+        <div>
+          <div class="badges-header">
+            <h2 style="margin:0">{{ t('badgesTitle') }}</h2>
+            <span class="badges-earned-count">{{ t('badgesEarned', { count: earnedBadgeIds.size }) }} / {{ BADGES.length }}</span>
+          </div>
+          <p class="badges-subtitle">{{ t('badgesSubtitle') }}</p>
+        </div>
+        <div v-for="group in badgesByCategory" :key="group.key" class="badges-category">
+          <p class="badges-category-label">{{ group.label }}</p>
+          <div class="badges-grid">
+            <div
+              v-for="badge in group.badges"
+              :key="badge.id"
+              class="badge-card"
+              :class="[earnedBadgeIds.has(badge.id) ? 'earned' : 'locked', `tier-${badge.tier}`]"
+            >
+              <div class="badge-icon">
+                <svg v-if="group.key === 'collection'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
+                </svg>
+                <svg v-else-if="group.key === 'trading'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
+                </svg>
+                <svg v-else-if="group.key === 'community'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="9" cy="7" r="3"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="17" cy="8" r="2.5"/><path d="M21 21v-1.5a3.5 3.5 0 0 0-2.5-3.36"/>
+                </svg>
+                <svg v-else-if="group.key === 'predictions'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/>
+                </svg>
+                <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+              </div>
+              <span class="badge-name">{{ t(`badge_${badge.id}_name`) }}</span>
+              <p class="badge-desc">{{ t(`badge_${badge.id}_desc`) }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </article>
 
     <article class="card gdpr-card">

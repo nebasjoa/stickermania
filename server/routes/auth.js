@@ -220,7 +220,7 @@ router.post('/logout', (_req, res) => {
 
 router.get('/me', requireAuth, async (req, res) => {
   const users = await query(
-    `SELECT id, username, email, is_admin, country, city, postal_trade_enabled
+    `SELECT id, username, email, is_admin, country, city, postal_trade_enabled, created_at
      FROM users
      WHERE id = ?
      LIMIT 1`,
@@ -248,6 +248,7 @@ router.get('/me', requireAuth, async (req, res) => {
       city: users[0].city,
       postalTradeEnabled: Boolean(users[0].postal_trade_enabled),
       isAdmin: Boolean(users[0].is_admin),
+      createdAt: users[0].created_at,
       needs,
       offers
     }

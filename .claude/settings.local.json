@@ -21,7 +21,8 @@
       "Bash(git add:*)",
       "Bash(git push:*)",
       "Bash(npm install:*)",
-      "Bash(cd C:/git/stickermania && npm run build 2>&1)"
+      "Bash(cd C:/git/stickermania && npm run build 2>&1)",
+      "Bash(node -e ' *)"
     ]
   }
 }
