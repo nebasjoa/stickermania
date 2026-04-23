@@ -829,6 +829,104 @@ small {
   color: #cbd5e1 !important;
 }
 
+.live-banner {
+  margin: 1.75rem 0 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #fff;
+  background: #16a34a;
+  border-radius: var(--radius-pill);
+  padding: 0.2rem 0.65rem;
+  width: fit-content;
+}
+
+.live-badge::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  animation: live-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.75); }
+}
+
+.live-banner-label {
+  margin: 0;
+  color: #90caf9 !important;
+  font-size: 0.7rem !important;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.live-banner-stats {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.live-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.live-stat-value {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: #f1f5f9;
+  font-variant-numeric: tabular-nums;
+}
+
+.live-stat-unit {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #64748b;
+  align-self: flex-end;
+  margin-bottom: 0.15rem;
+}
+
+.live-stat-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  width: 100%;
+  margin-top: 0.2rem;
+}
+
+.live-stat-divider {
+  width: 1px;
+  height: 2.5rem;
+  background: rgba(255, 255, 255, 0.12);
+  flex-shrink: 0;
+}
+
+.live-banner-cta {
+  width: fit-content;
+  margin-top: 0.25rem;
+}
+
 /* ── Layouts ────────────────────────────────────────────── */
 
 .stack {
@@ -1442,6 +1540,21 @@ small {
   color: var(--danger-text);
 }
 
+.status--sent {
+  background: #e8f0fe;
+  color: #1a56db;
+}
+
+.status--done {
+  background: var(--success-soft);
+  color: var(--success-text);
+}
+
+.status--cancelled {
+  background: #fef3c7;
+  color: #92400e;
+}
+
 /* ── Trades ─────────────────────────────────────────────── */
 
 .trade-row {
@@ -1489,6 +1602,63 @@ small {
   gap: 0.6rem;
   min-width: 128px;
   flex-shrink: 0;
+}
+
+.trade-cancel-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.85rem;
+  background: var(--danger-soft);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius);
+}
+
+.trade-cancel-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--danger-text);
+}
+
+.trade-cancel-textarea {
+  resize: vertical;
+  min-height: 3.5rem;
+  font-size: 0.875rem;
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+  background: var(--surface);
+  color: var(--text);
+  width: 100%;
+}
+
+.trade-cancel-textarea:focus {
+  outline: none;
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.12);
+}
+
+.trade-cancel-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.trade-cancel-reason {
+  font-size: 0.85rem;
+  color: var(--warning-text);
+  margin: 0.2rem 0;
+}
+
+button.danger {
+  color: var(--danger-text);
+  border-color: var(--danger-border);
+}
+
+button.danger:hover:not(:disabled) {
+  background: var(--danger-soft);
+  border-color: var(--danger);
 }
 
 .trade-approval-note {

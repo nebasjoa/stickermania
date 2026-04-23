@@ -15,6 +15,7 @@ import {
 const { t } = useI18n();
 
 const KICKOFF = new Date('2026-06-11T19:00:00.000Z');
+const FINAL = new Date('2026-07-19T20:00:00.000Z');
 const TOURNAMENT_TABS = {
   standings: 'standings',
   knockout: 'knockout'
@@ -30,6 +31,13 @@ const KNOCKOUT_STAGE_LABELS = {
 
 const countdown = reactive({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: false });
 const activeTournamentTab = ref(TOURNAMENT_TABS.standings);
+
+const tournamentDay = computed(() =>
+  Math.min(39, Math.floor((Date.now() - KICKOFF.getTime()) / 86_400_000) + 1)
+);
+const daysToFinal = computed(() =>
+  Math.max(0, Math.ceil((FINAL.getTime() - Date.now()) / 86_400_000))
+);
 const selectedMatchDate = ref('');
 const localKickoffTime = KICKOFF.toLocaleString(undefined, {
   weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
@@ -172,12 +180,9 @@ onUnmounted(() => {
       <p>{{ t('heroBody') }}</p>
     </div>
 
-    <div class="countdown-wrap">
-      <p class="countdown-label">
-        <template v-if="!countdown.expired">KICKOFF IN</template>
-        <template v-else>THE WORLD CUP HAS STARTED!</template>
-      </p>
-      <div v-if="!countdown.expired" class="countdown-tiles">
+    <div v-if="!countdown.expired" class="countdown-wrap">
+      <p class="countdown-label">KICKOFF IN</p>
+      <div class="countdown-tiles">
         <div class="countdown-tile">
           <span class="countdown-value">{{ String(countdown.days).padStart(2, '0') }}</span>
           <span class="countdown-unit">days</span>
@@ -199,6 +204,24 @@ onUnmounted(() => {
         </div>
       </div>
       <p class="countdown-localtime">{{ localKickoffTime }}</p>
+    </div>
+
+    <div v-else class="live-banner">
+      <span class="live-badge">LIVE</span>
+      <p class="live-banner-label">FIFA WORLD CUP 2026 IS UNDERWAY</p>
+      <div class="live-banner-stats">
+        <div class="live-stat">
+          <span class="live-stat-value">{{ tournamentDay }}</span>
+          <span class="live-stat-unit">/ 39</span>
+          <span class="live-stat-label">Tournament day</span>
+        </div>
+        <div class="live-stat-divider"></div>
+        <div class="live-stat">
+          <span class="live-stat-value">{{ daysToFinal }}</span>
+          <span class="live-stat-label">Days to Final</span>
+        </div>
+      </div>
+      <RouterLink to="/predictions" class="live-banner-cta btn">Predict matches</RouterLink>
     </div>
 
     <div class="hero-grid">

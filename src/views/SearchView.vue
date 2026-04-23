@@ -6,7 +6,7 @@ import CountrySelect from '../components/CountrySelect.vue';
 import LocationLabel from '../components/LocationLabel.vue';
 import {
   currentUser, isAuthenticated, loading, searchForm, searchResults,
-  getTradeDraft, searchCollectors, sendTradeRequest, setStatus
+  getTradeDraft, tradeDrafts, searchCollectors, sendTradeRequest, setStatus
 } from '../store.js';
 
 const { t } = useI18n();
@@ -36,18 +36,32 @@ watch(() => searchForm.country, (next, prev) => {
   if (next !== prev) searchForm.city = '';
 });
 
-function isStickerTradeMatch(sticker, source) {
-  return source === 'request'
-    ? currentUserNeeds.value.includes(sticker)
-    : currentUserOffers.value.includes(sticker);
-}
+// Map sticker → userId for every sticker already selected in another draft
+const offeredElsewhere = computed(() => {
+  const taken = {};
+  for (const user of searchResults.value) {
+    const draft = tradeDrafts[user.id];
+    if (draft) {
+      for (const sticker of draft.offeredStickers) {
+        taken[sticker] = user.id;
+      }
+    }
+  }
+  return taken;
+});
 
 function requestedStickerOptions(user) {
-  return user.offers.filter((sticker) => isStickerTradeMatch(sticker, 'request'));
+  return user.offers.filter((s) => currentUserNeeds.value.includes(s));
 }
 
-function offeredStickerOptions(user) {
-  return user.needs.filter((sticker) => isStickerTradeMatch(sticker, 'offer'));
+// All of my offers that are not committed to a different user's draft
+function availableOffersForUser(userId) {
+  const taken = offeredElsewhere.value;
+  return currentUserOffers.value.filter((s) => !(s in taken) || taken[s] === userId);
+}
+
+function isOfferMatch(sticker, user) {
+  return user.needs.includes(sticker);
 }
 
 function isTradeStickerSelected(userId, field, sticker) {
@@ -171,13 +185,13 @@ async function doSearch() {
           </div>
           <div class="trade-sticker-picker">
             <strong>{{ myOffersLabel() }}:</strong>
-            <span v-if="offeredStickerOptions(user).length" class="trade-sticker-list">
+            <span v-if="availableOffersForUser(user.id).length" class="trade-sticker-list">
               <button
-                v-for="sticker in offeredStickerOptions(user)"
+                v-for="sticker in availableOffersForUser(user.id)"
                 :key="`trade-offer-${user.id}-${sticker}`"
                 type="button"
-                class="trade-sticker-chip trade-sticker-chip--offer is-match"
-                :class="{ 'is-selected': isTradeStickerSelected(user.id, 'offeredStickers', sticker) }"
+                class="trade-sticker-chip trade-sticker-chip--offer"
+                :class="{ 'is-match': isOfferMatch(sticker, user), 'is-selected': isTradeStickerSelected(user.id, 'offeredStickers', sticker) }"
                 @click="toggleTradeSticker(user.id, 'offeredStickers', sticker)"
               >{{ sticker }}</button>
             </span>

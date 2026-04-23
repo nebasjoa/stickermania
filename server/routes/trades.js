@@ -20,6 +20,7 @@ router.get('/', requireAuth, async (req, res) => {
        tr.recipient_postal_address,
        tr.location_note,
        tr.status,
+       tr.cancellation_reason,
        tr.created_at,
        tr.requester_user_id,
        tr.target_user_id,
@@ -119,24 +120,16 @@ router.post('/', requireAuth, async (req, res) => {
 });
 
 router.put('/:id/status', requireAuth, async (req, res) => {
-  const { status, recipientFullName = '', recipientPostalAddress = '' } = req.body;
+  const { status, recipientFullName = '', recipientPostalAddress = '', cancellationReason = '' } = req.body;
 
-  if (!['accepted', 'declined'].includes(status)) {
+  const VALID_STATUSES = ['accepted', 'declined', 'sent', 'done', 'cancelled'];
+  if (!VALID_STATUSES.includes(status)) {
     return res.status(400).json({ message: 'Invalid trade status.' });
   }
 
   const trades = await query(
-    `SELECT
-       id,
-       requester_user_id,
-       target_user_id,
-       requested_stickers,
-       offered_stickers,
-       trade_method,
-       status
-     FROM trade_requests
-     WHERE id = ?
-     LIMIT 1`,
+    `SELECT id, requester_user_id, target_user_id, requested_stickers, offered_stickers, trade_method, status
+     FROM trade_requests WHERE id = ? LIMIT 1`,
     [req.params.id]
   );
 
@@ -144,71 +137,134 @@ router.put('/:id/status', requireAuth, async (req, res) => {
     return res.status(404).json({ message: 'Trade request not found.' });
   }
 
-  if (Number(trades[0].target_user_id) !== Number(req.user.id)) {
-    return res.status(403).json({ message: 'Only the target user can update this request.' });
+  const trade = trades[0];
+  const isRequester = Number(trade.requester_user_id) === Number(req.user.id);
+  const isTarget    = Number(trade.target_user_id)    === Number(req.user.id);
+
+  if (!isRequester && !isTarget) {
+    return res.status(403).json({ message: 'You are not part of this trade.' });
   }
 
-  if (trades[0].status !== 'pending') {
-    return res.status(409).json({ message: 'This trade request has already been processed.' });
+  // accept / decline: target only
+  if ((status === 'accepted' || status === 'declined') && !isTarget) {
+    return res.status(403).json({ message: 'Only the target user can accept or decline this request.' });
   }
 
-  const trimmedRecipientFullName = String(recipientFullName || '').trim();
+  // sent: requester only
+  if (status === 'sent' && !isRequester) {
+    return res.status(403).json({ message: 'Only the requester can mark a trade as sent.' });
+  }
+
+  // valid state-machine transitions
+  const VALID_FROM = {
+    accepted:  ['pending'],
+    declined:  ['pending'],
+    sent:      ['accepted'],
+    done:      ['accepted', 'sent'],
+    cancelled: ['accepted', 'sent'],
+  };
+
+  if (!VALID_FROM[status].includes(trade.status)) {
+    return res.status(409).json({ message: `Cannot change status from '${trade.status}' to '${status}'.` });
+  }
+
+  const trimmedRecipientFullName     = String(recipientFullName || '').trim();
   const trimmedRecipientPostalAddress = String(recipientPostalAddress || '').trim();
+  const trimmedCancellationReason    = String(cancellationReason || '').trim();
 
-  if (status === 'accepted' && trades[0].trade_method === 'post' && !trimmedRecipientFullName) {
+  if (status === 'accepted' && trade.trade_method === 'post' && !trimmedRecipientFullName) {
     return res.status(400).json({ message: 'Recipient full name is required for postal trades.' });
   }
-
-  if (status === 'accepted' && trades[0].trade_method === 'post' && !trimmedRecipientPostalAddress) {
+  if (status === 'accepted' && trade.trade_method === 'post' && !trimmedRecipientPostalAddress) {
     return res.status(400).json({ message: 'Recipient postal address is required for postal trades.' });
+  }
+  if (status === 'cancelled' && !trimmedCancellationReason) {
+    return res.status(400).json({ message: 'A cancellation reason is required.' });
   }
 
   await runInTransaction(async (connection) => {
-    await connection.query(
-      'UPDATE trade_requests SET status = ?, recipient_full_name = ?, recipient_postal_address = ? WHERE id = ?',
-      [
-        status,
-        status === 'accepted' && trades[0].trade_method === 'post' ? trimmedRecipientFullName : '',
-        status === 'accepted' && trades[0].trade_method === 'post' ? trimmedRecipientPostalAddress : '',
-        req.params.id
-      ]
-    );
-
-    if (status !== 'accepted') {
-      return;
-    }
-
-    const requested = normalizeStickerNumbers(trades[0].requested_stickers);
-    const offered = normalizeStickerNumbers(trades[0].offered_stickers);
-
-    for (const sticker of requested) {
+    if (status === 'accepted') {
       await connection.query(
-        'DELETE FROM user_stickers WHERE user_id = ? AND sticker_number = ? AND sticker_type = ?',
-        [trades[0].target_user_id, sticker, 'offer']
+        'UPDATE trade_requests SET status = ?, recipient_full_name = ?, recipient_postal_address = ? WHERE id = ?',
+        [
+          'accepted',
+          trade.trade_method === 'post' ? trimmedRecipientFullName : '',
+          trade.trade_method === 'post' ? trimmedRecipientPostalAddress : '',
+          req.params.id
+        ]
       );
-      await connection.query(
-        'DELETE FROM user_stickers WHERE user_id = ? AND sticker_number = ? AND sticker_type = ?',
-        [trades[0].requester_user_id, sticker, 'need']
-      );
-    }
 
-    for (const sticker of offered) {
+      const requested = normalizeStickerNumbers(trade.requested_stickers);
+      const offered   = normalizeStickerNumbers(trade.offered_stickers);
+
+      for (const sticker of requested) {
+        await connection.query(
+          'DELETE FROM user_stickers WHERE user_id = ? AND sticker_number = ? AND sticker_type = ?',
+          [trade.target_user_id, sticker, 'offer']
+        );
+        await connection.query(
+          'DELETE FROM user_stickers WHERE user_id = ? AND sticker_number = ? AND sticker_type = ?',
+          [trade.requester_user_id, sticker, 'need']
+        );
+      }
+      for (const sticker of offered) {
+        await connection.query(
+          'DELETE FROM user_stickers WHERE user_id = ? AND sticker_number = ? AND sticker_type = ?',
+          [trade.requester_user_id, sticker, 'offer']
+        );
+        await connection.query(
+          'DELETE FROM user_stickers WHERE user_id = ? AND sticker_number = ? AND sticker_type = ?',
+          [trade.target_user_id, sticker, 'need']
+        );
+      }
+    } else if (status === 'cancelled') {
       await connection.query(
-        'DELETE FROM user_stickers WHERE user_id = ? AND sticker_number = ? AND sticker_type = ?',
-        [trades[0].requester_user_id, sticker, 'offer']
+        'UPDATE trade_requests SET status = ?, cancellation_reason = ? WHERE id = ?',
+        ['cancelled', trimmedCancellationReason, req.params.id]
       );
+
+      // Restore stickers removed when trade was originally accepted
+      const requested = normalizeStickerNumbers(trade.requested_stickers);
+      const offered   = normalizeStickerNumbers(trade.offered_stickers);
+
+      for (const sticker of requested) {
+        await connection.query(
+          'INSERT IGNORE INTO user_stickers (user_id, sticker_number, sticker_type) VALUES (?, ?, ?)',
+          [trade.target_user_id, sticker, 'offer']
+        );
+        await connection.query(
+          'INSERT IGNORE INTO user_stickers (user_id, sticker_number, sticker_type) VALUES (?, ?, ?)',
+          [trade.requester_user_id, sticker, 'need']
+        );
+      }
+      for (const sticker of offered) {
+        await connection.query(
+          'INSERT IGNORE INTO user_stickers (user_id, sticker_number, sticker_type) VALUES (?, ?, ?)',
+          [trade.requester_user_id, sticker, 'offer']
+        );
+        await connection.query(
+          'INSERT IGNORE INTO user_stickers (user_id, sticker_number, sticker_type) VALUES (?, ?, ?)',
+          [trade.target_user_id, sticker, 'need']
+        );
+      }
+    } else {
+      // sent, done, declined — simple status update
       await connection.query(
-        'DELETE FROM user_stickers WHERE user_id = ? AND sticker_number = ? AND sticker_type = ?',
-        [trades[0].target_user_id, sticker, 'need']
+        'UPDATE trade_requests SET status = ? WHERE id = ?',
+        [status, req.params.id]
       );
     }
   });
 
-  return res.json({
-    message: status === 'accepted'
-      ? 'Trade request accepted and both collections were updated.'
-      : 'Trade request declined.'
-  });
+  const MESSAGES = {
+    accepted:  'Trade accepted and both collections were updated.',
+    declined:  'Trade request declined.',
+    sent:      'Trade marked as sent.',
+    done:      'Trade marked as done.',
+    cancelled: 'Trade cancelled and stickers restored to both collections.',
+  };
+
+  return res.json({ message: MESSAGES[status] });
 });
 
 router.delete('/:id', requireAuth, async (req, res) => {
@@ -237,8 +293,8 @@ router.delete('/:id', requireAuth, async (req, res) => {
     return res.status(403).json({ message: 'You cannot remove this trade request.' });
   }
 
-  if (trade.status !== 'declined') {
-    return res.status(409).json({ message: 'Only declined trade requests can be removed.' });
+  if (!['declined', 'cancelled', 'done'].includes(trade.status)) {
+    return res.status(409).json({ message: 'Only declined, cancelled, or done trade requests can be removed.' });
   }
 
   await query('DELETE FROM trade_requests WHERE id = ?', [req.params.id]);

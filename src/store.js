@@ -372,7 +372,8 @@ export async function updateTradeStatus(id, status, options = {}) {
     const { data } = await api.put(`/trades/${id}/status`, {
       status,
       recipientFullName: options.recipientFullName || '',
-      recipientPostalAddress: options.recipientPostalAddress || ''
+      recipientPostalAddress: options.recipientPostalAddress || '',
+      cancellationReason: options.cancellationReason || ''
     });
     setStatus(data.message);
     delete tradeApprovalDrafts[id];
