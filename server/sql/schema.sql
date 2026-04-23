@@ -138,7 +138,7 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
 ALTER TABLE trade_requests
   MODIFY COLUMN status ENUM('pending','accepted','declined','sent','done','cancelled') NOT NULL DEFAULT 'pending';
 ALTER TABLE trade_requests
-  ADD COLUMN IF NOT EXISTS cancellation_reason VARCHAR(255) NOT NULL DEFAULT '';
+  ADD COLUMN cancellation_reason VARCHAR(255) NOT NULL DEFAULT '';
 
 CREATE TABLE IF NOT EXISTS meetup_attendees (
   id INT PRIMARY KEY AUTO_INCREMENT,
