@@ -117,8 +117,8 @@ function goToRegister() {
           <div class="divider"></div>
           <h3>{{ t('verifyNotice') }}</h3>
           <form class="stack" @submit.prevent="submitVerify">
-            <input v-model="verificationToken" placeholder="Verification token" />
-            <button type="submit" class="secondary" :disabled="loading">Verify email</button>
+            <input v-model="verificationToken" :placeholder="t('verificationTokenPlaceholder')" />
+            <button type="submit" class="secondary" :disabled="loading">{{ t('verifyEmailBtn') }}</button>
           </form>
         </template>
       </template>

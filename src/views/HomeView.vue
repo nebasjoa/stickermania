@@ -20,14 +20,14 @@ const TOURNAMENT_TABS = {
   standings: 'standings',
   knockout: 'knockout'
 };
-const KNOCKOUT_STAGE_LABELS = {
-  r32: 'Round of 32',
-  r16: 'Round of 16',
-  qf: 'Quarter-Finals',
-  sf: 'Semi-Finals',
-  third: '3rd Place',
-  final: 'Final'
-};
+const knockoutStageLabelMap = computed(() => ({
+  r32: t('knockoutR32'),
+  r16: t('knockoutR16'),
+  qf: t('knockoutQF'),
+  sf: t('knockoutSF'),
+  third: t('knockoutThird'),
+  final: t('knockoutFinal')
+}));
 
 const countdown = reactive({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: false });
 const activeTournamentTab = ref(TOURNAMENT_TABS.standings);
@@ -76,7 +76,7 @@ const knockoutGamesByStage = computed(() => {
 });
 
 const orderedKnockoutStages = computed(() =>
-  Object.entries(KNOCKOUT_STAGE_LABELS)
+  Object.entries(knockoutStageLabelMap.value)
     .map(([key, label]) => ({
       key,
       label,
@@ -127,9 +127,9 @@ function formatMatchDate(dateStr) {
 
 function matchLabel(game) {
   if (game.stage && game.stage !== 'group') {
-    return `${KNOCKOUT_STAGE_LABELS[game.stage] || 'Knockout'} - #${game.matchNumber}`;
+    return `${knockoutStageLabelMap.value[game.stage] || t('predKnockout')} - #${game.matchNumber}`;
   }
-  return `Group ${game.group} - #${game.matchNumber}`;
+  return `${t('standingsGroupLabel', { group: game.group })} - #${game.matchNumber}`;
 }
 
 function moveMatchDate(step) {
@@ -181,26 +181,26 @@ onUnmounted(() => {
     </div>
 
     <div v-if="!countdown.expired" class="countdown-wrap">
-      <p class="countdown-label">KICKOFF IN</p>
+      <p class="countdown-label">{{ t('countdownIn') }}</p>
       <div class="countdown-tiles">
         <div class="countdown-tile">
           <span class="countdown-value">{{ String(countdown.days).padStart(2, '0') }}</span>
-          <span class="countdown-unit">days</span>
+          <span class="countdown-unit">{{ t('countdownDays') }}</span>
         </div>
         <span class="countdown-sep">:</span>
         <div class="countdown-tile">
           <span class="countdown-value">{{ String(countdown.hours).padStart(2, '0') }}</span>
-          <span class="countdown-unit">hrs</span>
+          <span class="countdown-unit">{{ t('countdownHrs') }}</span>
         </div>
         <span class="countdown-sep">:</span>
         <div class="countdown-tile">
           <span class="countdown-value">{{ String(countdown.minutes).padStart(2, '0') }}</span>
-          <span class="countdown-unit">min</span>
+          <span class="countdown-unit">{{ t('countdownMin') }}</span>
         </div>
         <span class="countdown-sep">:</span>
         <div class="countdown-tile">
           <span class="countdown-value">{{ String(countdown.seconds).padStart(2, '0') }}</span>
-          <span class="countdown-unit">sec</span>
+          <span class="countdown-unit">{{ t('countdownSec') }}</span>
         </div>
       </div>
       <p class="countdown-localtime">{{ localKickoffTime }}</p>
@@ -208,20 +208,20 @@ onUnmounted(() => {
 
     <div v-else class="live-banner">
       <span class="live-badge">LIVE</span>
-      <p class="live-banner-label">FIFA WORLD CUP 2026 IS UNDERWAY</p>
+      <p class="live-banner-label">{{ t('liveBannerLabel') }}</p>
       <div class="live-banner-stats">
         <div class="live-stat">
           <span class="live-stat-value">{{ tournamentDay }}</span>
           <span class="live-stat-unit">/ 39</span>
-          <span class="live-stat-label">Tournament day</span>
+          <span class="live-stat-label">{{ t('liveTournamentDay') }}</span>
         </div>
         <div class="live-stat-divider"></div>
         <div class="live-stat">
           <span class="live-stat-value">{{ daysToFinal }}</span>
-          <span class="live-stat-label">Days to Final</span>
+          <span class="live-stat-label">{{ t('liveDaysToFinal') }}</span>
         </div>
       </div>
-      <RouterLink to="/predictions" class="live-banner-cta btn">Predict matches</RouterLink>
+      <RouterLink to="/predictions" class="live-banner-cta btn">{{ t('livePredictCta') }}</RouterLink>
     </div>
 
     <div class="hero-grid">
@@ -239,19 +239,19 @@ onUnmounted(() => {
   <section class="panini-promo card">
     <img src="https://paninistore.com/media/logo/Panini.png" alt="Panini" class="panini-logo" />
     <div class="panini-promo-text">
-      <h2>Get the Official Album</h2>
-      <p>Order the official Panini FIFA World Cup 2026™ sticker album and starter pack.</p>
+      <h2>{{ t('paniniTitle') }}</h2>
+      <p>{{ t('paniniBody') }}</p>
     </div>
-    <a href="https://paninistore.com/shp_int_en/catalog/category/view/s/albums-stickers-and-cards/id/12721/" target="_blank" rel="noopener noreferrer" class="btn">Shop Panini</a>
+    <a href="https://paninistore.com/shp_int_en/catalog/category/view/s/albums-stickers-and-cards/id/12721/" target="_blank" rel="noopener noreferrer" class="btn">{{ t('paniniShop') }}</a>
   </section>
 
   <section v-if="allMatchDates.length" class="card">
     <div class="card-top">
       <div>
         <p class="eyebrow">World Cup 2026</p>
-        <h2>Matches - {{ formatMatchDate(selectedMatchDate) }}</h2>
+        <h2>{{ t('matchesHeading') }} - {{ formatMatchDate(selectedMatchDate) }}</h2>
       </div>
-      <RouterLink to="/predictions" class="btn secondary">Predict</RouterLink>
+      <RouterLink to="/predictions" class="btn secondary">{{ t('matchPredict') }}</RouterLink>
     </div>
     <div class="matches-carousel-toolbar">
       <div class="matches-carousel-nav">
@@ -276,7 +276,7 @@ onUnmounted(() => {
       </div>
 
       <label class="matches-date-picker">
-        <span>Date</span>
+        <span>{{ t('matchesDate') }}</span>
         <input
           v-model="selectedMatchDate"
           type="date"
@@ -300,7 +300,7 @@ onUnmounted(() => {
       </article>
     </div>
     <p v-if="selectedMatchDate && !selectedMatches.length" class="home-panel-empty">
-      No games scheduled for {{ formatMatchDate(selectedMatchDate) }}.
+      {{ t('matchesNoGames', { date: formatMatchDate(selectedMatchDate) }) }}
     </p>
   </section>
 
@@ -308,7 +308,7 @@ onUnmounted(() => {
     <div class="card-top">
       <div>
         <p class="eyebrow">World Cup 2026</p>
-        <h2>{{ activeTournamentTab === TOURNAMENT_TABS.standings ? 'Group Standings' : 'Knockout Phase' }}</h2>
+        <h2>{{ activeTournamentTab === TOURNAMENT_TABS.standings ? t('groupStandings') : t('knockoutPhase') }}</h2>
       </div>
     </div>
 
@@ -319,7 +319,7 @@ onUnmounted(() => {
         :class="{ active: activeTournamentTab === TOURNAMENT_TABS.standings }"
         @click="activeTournamentTab = TOURNAMENT_TABS.standings"
       >
-        Group Standings
+        {{ t('groupStandings') }}
       </button>
       <button
         type="button"
@@ -327,17 +327,17 @@ onUnmounted(() => {
         :class="{ active: activeTournamentTab === TOURNAMENT_TABS.knockout }"
         @click="activeTournamentTab = TOURNAMENT_TABS.knockout"
       >
-        Knockout Phase
+        {{ t('knockoutPhase') }}
       </button>
     </div>
 
     <div v-if="activeTournamentTab === TOURNAMENT_TABS.standings" class="standings-grid">
       <div v-for="(teams, group) in groupStandings" :key="group" class="standings-group">
-        <div class="standings-group-header">Group {{ group }}</div>
+        <div class="standings-group-header">{{ t('standingsGroupLabel', { group }) }}</div>
         <table class="standings-table">
           <thead>
             <tr>
-              <th class="col-team">Team</th>
+              <th class="col-team">{{ t('lbColUser') }}</th>
               <th>P</th>
               <th>W</th>
               <th>D</th>
@@ -367,7 +367,7 @@ onUnmounted(() => {
         <div class="home-knockout-grid">
           <article v-for="game in stage.games" :key="game.id" class="home-knockout-card">
             <div class="home-knockout-meta">
-              <span>Match {{ game.matchNumber }}</span>
+              <span>{{ t('predMatchNum', { n: game.matchNumber }) }}</span>
               <span>{{ formatFullKickoff(game.startsAt) }}</span>
             </div>
             <div class="home-knockout-teams">
@@ -395,7 +395,7 @@ onUnmounted(() => {
       <article v-for="meetup in homeMeetups" :key="`home-meetup-${meetup.id}`" class="home-panel-item">
         <div class="home-panel-item-top">
           <strong>{{ meetup.title }}</strong>
-          <span class="pill">{{ meetup.attendee_count }} going</span>
+          <span class="pill">{{ meetup.attendee_count }} {{ t('attendeeGoing') }}</span>
         </div>
         <p class="home-panel-item-sub"><LocationLabel :city="meetup.city" :country="meetup.country" /></p>
         <p class="home-panel-item-date">{{ formatMeetupDate(meetup.starts_at) }}</p>
@@ -405,15 +405,15 @@ onUnmounted(() => {
     <section class="card stack">
       <div class="card-top">
         <div>
-          <p class="eyebrow">Predictions</p>
-          <h2>Top Predictors</h2>
+          <p class="eyebrow">{{ t('lbEyebrow') }}</p>
+          <h2>{{ t('topPredictors') }}</h2>
         </div>
         <div class="home-card-actions">
-          <RouterLink to="/predictions/leaderboard" class="btn secondary">Show all</RouterLink>
-          <RouterLink to="/predictions" class="btn secondary">Predict</RouterLink>
+          <RouterLink to="/predictions/leaderboard" class="btn secondary">{{ t('showAll') }}</RouterLink>
+          <RouterLink to="/predictions" class="btn secondary">{{ t('matchPredict') }}</RouterLink>
         </div>
       </div>
-      <div v-if="!homeLeaderboard.length" class="home-panel-empty">No predictions yet.</div>
+      <div v-if="!homeLeaderboard.length" class="home-panel-empty">{{ t('noPredictionsYet') }}</div>
       <article v-for="(entry, index) in homeLeaderboard" :key="`lb-${entry.username}`" class="home-panel-item">
         <div class="home-panel-item-top">
           <span class="home-rank">{{ index + 1 }}</span>
@@ -427,12 +427,12 @@ onUnmounted(() => {
     <section class="card stack">
       <div class="card-top">
         <div>
-          <p class="eyebrow">Community</p>
-          <h2>New Collectors</h2>
+          <p class="eyebrow">{{ t('communityEyebrow') }}</p>
+          <h2>{{ t('newCollectors') }}</h2>
         </div>
         <RouterLink to="/search" class="btn secondary">{{ t('navSearch') }}</RouterLink>
       </div>
-      <div v-if="!homeRecentCollectors.length" class="home-panel-empty">No collectors yet.</div>
+      <div v-if="!homeRecentCollectors.length" class="home-panel-empty">{{ t('noCollectorsYet') }}</div>
       <article v-for="collector in homeRecentCollectors" :key="`collector-${collector.id}`" class="home-panel-item">
         <div class="home-panel-item-top">
           <strong>{{ collector.username }}</strong>

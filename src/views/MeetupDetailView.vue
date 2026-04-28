@@ -23,7 +23,7 @@ async function loadMeetup() {
   const meetupId = Number(route.params.id);
   if (!meetupId) {
     meetup.value = null;
-    setStatus('', 'Invalid meetup id.');
+    setStatus('', t('meetupInvalidId'));
     return;
   }
 
@@ -32,7 +32,7 @@ async function loadMeetup() {
     meetup.value = data.meetup;
   } catch (error) {
     meetup.value = null;
-    setStatus('', error.response?.data?.message || 'Could not load meetup.');
+    setStatus('', error.response?.data?.message || t('meetupLoadError'));
   }
 }
 
@@ -52,7 +52,7 @@ onMounted(() => {
     <article v-if="meetup" class="card meetup-card meetup-card--selected">
       <div class="card-top">
         <div>
-          <p class="eyebrow">Meetup #{{ meetup.id }}</p>
+          <p class="eyebrow">{{ t('meetupEyebrow', { id: meetup.id }) }}</p>
           <h2>{{ meetup.title }}</h2>
           <p><LocationLabel :city="meetup.city" :country="meetup.country" /></p>
         </div>
@@ -63,11 +63,11 @@ onMounted(() => {
         <span><strong>{{ t('meetupCreator') }}:</strong> {{ meetup.creator_username }}</span>
         <span><strong>{{ t('meetupVenue') }}:</strong> {{ meetup.venue || '-' }}</span>
         <span><strong>{{ t('meetupAttendees') }}:</strong> {{ meetup.attendee_count }}</span>
-        <span><strong>Share URL:</strong> {{ shareOrigin }}{{ meetupPath(meetup.id) }}</span>
+        <span><strong>{{ t('meetupShareUrl') }}:</strong> {{ shareOrigin }}{{ meetupPath(meetup.id) }}</span>
       </div>
       <p><strong>{{ t('meetupDetails') }}:</strong> {{ meetup.details || '-' }}</p>
       <div class="meetup-card-actions">
-        <RouterLink class="btn secondary" to="/meetups">All meetups</RouterLink>
+        <RouterLink class="btn secondary" to="/meetups">{{ t('meetupAll') }}</RouterLink>
         <button
           v-if="isAuthenticated"
           type="button"
@@ -80,8 +80,8 @@ onMounted(() => {
     </article>
 
     <article v-else class="card">
-      <p>Meetup not found.</p>
-      <RouterLink class="btn secondary" to="/meetups">Back to meetups</RouterLink>
+      <p>{{ t('meetupNotFound') }}</p>
+      <RouterLink class="btn secondary" to="/meetups">{{ t('meetupBackTo') }}</RouterLink>
     </article>
   </section>
 </template>

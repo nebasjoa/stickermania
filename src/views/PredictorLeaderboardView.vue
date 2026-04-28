@@ -41,8 +41,8 @@ onMounted(async () => {
     <article class="card">
       <div class="card-top">
         <div>
-          <p class="eyebrow">Predictions</p>
-          <h2>All Predictors</h2>
+          <p class="eyebrow">{{ t('lbEyebrow') }}</p>
+          <h2>{{ t('lbTitle') }}</h2>
         </div>
       </div>
 
@@ -55,15 +55,15 @@ onMounted(async () => {
           />
 
           <select v-model="filters.sort">
-            <option value="desc">Points: high to low</option>
-            <option value="asc">Points: low to high</option>
+            <option value="desc">{{ t('lbPointsHighLow') }}</option>
+            <option value="asc">{{ t('lbPointsLowHigh') }}</option>
           </select>
         </div>
       </form>
     </article>
 
     <article v-if="!loading && !leaderboardEntries.length" class="card">
-      <p>No predictors found for the selected filter.</p>
+      <p>{{ t('lbEmpty') }}</p>
     </article>
 
     <article v-else class="card predictor-table-card">
@@ -72,9 +72,9 @@ onMounted(async () => {
           <thead>
             <tr>
               <th class="predictor-col-rank">#</th>
-              <th>User</th>
-              <th>Location</th>
-              <th class="predictor-col-points">Points</th>
+              <th>{{ t('lbColUser') }}</th>
+              <th>{{ t('lbColLocation') }}</th>
+              <th class="predictor-col-points">{{ t('lbColPoints') }}</th>
             </tr>
           </thead>
           <tbody>

@@ -15,7 +15,7 @@ import AdminView from './views/AdminView.vue';
 import NewsView from './views/NewsView.vue';
 import NewsArticleView from './views/NewsArticleView.vue';
 
-const LOCALE_CODES = { en: 'en', de: 'de', rs: 'sr' };
+const LOCALE_CODES = { en: 'en', fr: 'fr', de: 'de', rs: 'sr' };
 
 const router = createRouter({
   history: createWebHistory(),
@@ -34,7 +34,7 @@ const router = createRouter({
     { path: '/admin',       component: AdminView, meta: { requiresAuth: true, requiresAdmin: true } },
     { path: '/news',        component: NewsView },
     { path: '/news/:slug',  component: NewsArticleView },
-    { path: '/:lang(en|de|rs)', redirect: to => {
+    { path: '/:lang(en|fr|de|rs)', redirect: to => {
       i18n.global.locale.value = LOCALE_CODES[to.params.lang];
       return '/';
     }},

@@ -40,7 +40,7 @@ async function searchMeetups() {
     await fetchMeetups();
     if (!meetups.value.length) setStatus(t('meetupEmpty'));
   } catch (error) {
-    setStatus('', error.response?.data?.message || 'Meetup search failed.');
+    setStatus('', error.response?.data?.message || t('meetupSearchError'));
   } finally {
     loading.value = false;
   }
@@ -107,7 +107,7 @@ async function toggleAttendance(meetup) {
       <article v-for="meetup in meetups" :key="meetup.id" class="card meetup-card">
         <div class="card-top">
           <div>
-            <p class="eyebrow">Meetup #{{ meetup.id }}</p>
+            <p class="eyebrow">{{ t('meetupEyebrow', { id: meetup.id }) }}</p>
             <h3>
               <RouterLink class="meetup-link" :to="meetupPath(meetup.id)">{{ meetup.title }}</RouterLink>
             </h3>
@@ -123,7 +123,7 @@ async function toggleAttendance(meetup) {
         </div>
         <p><strong>{{ t('meetupDetails') }}:</strong> {{ meetup.details || '-' }}</p>
         <div class="meetup-card-actions">
-          <RouterLink class="btn secondary" :to="meetupPath(meetup.id)">Open meetup</RouterLink>
+          <RouterLink class="btn secondary" :to="meetupPath(meetup.id)">{{ t('meetupOpen') }}</RouterLink>
           <button
             v-if="isAuthenticated"
             type="button"

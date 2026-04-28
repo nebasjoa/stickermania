@@ -10,14 +10,14 @@ import {
 const { t } = useI18n();
 
 const PREDICTION_GROUPS = ['A','B','C','D','E','F','G','H','I','J','K','L'];
-const KNOCKOUT_STAGES = [
-  { key: 'r32', label: 'Round of 32' },
-  { key: 'r16', label: 'Round of 16' },
-  { key: 'qf', label: 'Quarter-Finals' },
-  { key: 'sf', label: 'Semi-Finals' },
-  { key: 'third', label: '3rd Place' },
-  { key: 'final', label: 'Final' },
-];
+const KNOCKOUT_STAGES = computed(() => [
+  { key: 'r32', label: t('knockoutR32') },
+  { key: 'r16', label: t('knockoutR16') },
+  { key: 'qf', label: t('knockoutQF') },
+  { key: 'sf', label: t('knockoutSF') },
+  { key: 'third', label: t('knockoutThird') },
+  { key: 'final', label: t('knockoutFinal') },
+]);
 
 const gamesByGroup = computed(() => {
   const groups = {};
@@ -100,9 +100,9 @@ function canSubmitPrediction(game) {
 function predictionActionLabel(game) {
   const draft = predictionDrafts[game.id];
   if (draft.home === '' && draft.away === '' && game.prediction) {
-    return 'Clear';
+    return t('predClear');
   }
-  return 'Save';
+  return t('predSave');
 }
 
 function handleExtraTimeToggle(gameId) {
@@ -144,8 +144,8 @@ function knockoutActualSummary(game) {
 <template>
   <section>
     <article class="card">
-      <h2>Match Predictions</h2>
-      <p v-if="!isAuthenticated" class="card-intro">Login to submit your score predictions. All games are visible to everyone.</p>
+      <h2>{{ t('predMatchesTitle') }}</h2>
+      <p v-if="!isAuthenticated" class="card-intro">{{ t('predLoginNotice') }}</p>
       <div class="group-tabs">
         <button
           v-for="group in PREDICTION_GROUPS"
@@ -155,7 +155,7 @@ function knockoutActualSummary(game) {
           :class="{ active: activePredictionGroup === group }"
           @click="activePredictionGroup = group"
         >
-          <span class="group-tab-label">Group</span> {{ group }}
+          <span class="group-tab-label">{{ t('predGroup') }}</span> {{ group }}
         </button>
         <button
           type="button"
@@ -163,7 +163,7 @@ function knockoutActualSummary(game) {
           :class="{ active: activePredictionGroup === 'KO' }"
           @click="activePredictionGroup = 'KO'"
         >
-          Knockout
+          {{ t('predKnockout') }}
         </button>
       </div>
     </article>
@@ -208,10 +208,10 @@ function knockoutActualSummary(game) {
         :class="{ locked: isGameLocked(game) }"
       >
         <div class="prediction-game-meta">
-          <span class="game-match-num">Match {{ game.matchNumber }}</span>
+          <span class="game-match-num">{{ t('predMatchNum', { n: game.matchNumber }) }}</span>
           <span class="game-datetime">{{ formatGameDate(game.startsAt) }}</span>
           <span class="game-venue">{{ game.venue }}, {{ game.city }}</span>
-          <span v-if="isGameLocked(game)" class="pill muted">Locked</span>
+          <span v-if="isGameLocked(game)" class="pill muted">{{ t('predLocked') }}</span>
         </div>
 
         <div class="prediction-matchup">
@@ -233,7 +233,7 @@ function knockoutActualSummary(game) {
           />
           <CountryLabel class="pred-team away" :country="game.awayTeam" />
           <div v-if="game.actualHome != null" class="actual-result">
-            Final: {{ game.actualHome }} - {{ game.actualAway }}
+            {{ t('predFinalScore', { home: game.actualHome, away: game.actualAway }) }}
           </div>
         </div>
 
@@ -241,7 +241,7 @@ function knockoutActualSummary(game) {
           <span v-if="game.prediction?.points != null" :class="['points-badge', `points-badge--${game.prediction.points}`]">
             {{ game.prediction.points }} pt{{ game.prediction.points !== 1 ? 's' : '' }}
           </span>
-          <span v-else-if="predictionSaved[game.id]" class="pred-saved">Saved</span>
+          <span v-else-if="predictionSaved[game.id]" class="pred-saved">{{ t('predSaved') }}</span>
           <button
             v-if="!isGameLocked(game) && isAuthenticated"
             type="button"
@@ -253,7 +253,7 @@ function knockoutActualSummary(game) {
       </article>
 
       <article v-if="!(gamesByGroup[activePredictionGroup] || []).length" class="card">
-        <p>No games found for Group {{ activePredictionGroup }}.</p>
+        <p>{{ t('predNoGamesGroup', { group: activePredictionGroup }) }}</p>
       </article>
     </div>
 
@@ -283,10 +283,10 @@ function knockoutActualSummary(game) {
             :class="{ locked: isGameLocked(game) }"
           >
             <div class="prediction-game-meta">
-              <span class="game-match-num">Match {{ game.matchNumber }}</span>
+              <span class="game-match-num">{{ t('predMatchNum', { n: game.matchNumber }) }}</span>
               <span class="game-datetime">{{ formatGameDate(game.startsAt) }}</span>
               <span class="game-venue">{{ game.venue }}, {{ game.city }}</span>
-              <span v-if="isGameLocked(game)" class="pill muted">Locked</span>
+              <span v-if="isGameLocked(game)" class="pill muted">{{ t('predLocked') }}</span>
             </div>
 
             <div class="prediction-matchup">
@@ -320,11 +320,11 @@ function knockoutActualSummary(game) {
                   :disabled="isGameLocked(game) || !isAuthenticated"
                   @change="handleExtraTimeToggle(game.id)"
                 />
-                <span>Extra time</span>
+                <span>{{ t('predExtraTime') }}</span>
               </label>
 
               <div class="knockout-score-row" :class="{ disabled: !predictionDrafts[game.id].extraTimePlayed }">
-                <span class="knockout-score-label">After ET</span>
+                <span class="knockout-score-label">{{ t('predAfterET') }}</span>
                 <div class="pred-scores">
                   <input
                     v-model="predictionDrafts[game.id].extraHome"
@@ -351,11 +351,11 @@ function knockoutActualSummary(game) {
                   :disabled="!predictionDrafts[game.id].extraTimePlayed || isGameLocked(game) || !isAuthenticated"
                   @change="handlePenaltiesToggle(game.id)"
                 />
-                <span>Penalties</span>
+                <span>{{ t('predPenalties') }}</span>
               </label>
 
               <div class="knockout-score-row" :class="{ disabled: !predictionDrafts[game.id].penaltiesPlayed }">
-                <span class="knockout-score-label">Pens</span>
+                <span class="knockout-score-label">{{ t('predPens') }}</span>
                 <div class="pred-scores">
                   <input
                     v-model="predictionDrafts[game.id].penaltiesHome"
@@ -380,7 +380,7 @@ function knockoutActualSummary(game) {
               <span v-if="game.prediction?.points != null" :class="['points-badge', `points-badge--${game.prediction.points}`]">
                 {{ game.prediction.points }} pt{{ game.prediction.points !== 1 ? 's' : '' }}
               </span>
-              <span v-else-if="predictionSaved[game.id]" class="pred-saved">Saved</span>
+              <span v-else-if="predictionSaved[game.id]" class="pred-saved">{{ t('predSaved') }}</span>
               <button
                 v-if="!isGameLocked(game) && isAuthenticated"
                 type="button"
@@ -392,7 +392,7 @@ function knockoutActualSummary(game) {
           </article>
 
           <article v-if="!(knockoutByStage[stage.key] || []).length" class="card">
-            <p>No games found for this stage.</p>
+            <p>{{ t('predNoGamesStage') }}</p>
           </article>
         </template>
       </template>

@@ -18,6 +18,7 @@ watch(() => route.path, () => setStatus());
 
 const langOptions = [
   { value: 'en', label: 'EN', fi: 'gb' },
+  { value: 'fr', label: 'FR', fi: 'fr' },
   { value: 'de', label: 'DE', fi: 'de' },
   { value: 'sr', label: 'SR', fi: 'rs' }
 ];
