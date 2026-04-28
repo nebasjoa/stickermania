@@ -109,6 +109,18 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://worldcupstuff.com/terms</loc>
+    <lastmod>2026-04-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://worldcupstuff.com/privacy</loc>
+    <lastmod>2026-04-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
     <loc>https://worldcupstuff.com/login</loc>
     <lastmod>2026-04-21</lastmod>
     <changefreq>monthly</changefreq>

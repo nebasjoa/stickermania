@@ -4,6 +4,7 @@ import { RouterLink } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import CountryLabel from '../components/CountryLabel.vue';
 import LocationLabel from '../components/LocationLabel.vue';
+import api from '../api.js';
 import {
   homeMeetups,
   homeLeaderboard,
@@ -160,6 +161,33 @@ watch(
 function knockoutScore(game) {
   if (game.actualHome == null) return 'vs';
   return `${game.actualHome} - ${game.actualAway}`;
+}
+
+const suggestionOpen = ref(false);
+const suggestionMessage = ref('');
+const suggestionSending = ref(false);
+const suggestionDone = ref(false);
+
+async function submitSuggestion() {
+  if (!suggestionMessage.value.trim() || suggestionSending.value) return;
+  suggestionSending.value = true;
+  try {
+    await api.post('/suggestions', { message: suggestionMessage.value });
+    suggestionDone.value = true;
+    suggestionMessage.value = '';
+  } finally {
+    suggestionSending.value = false;
+  }
+}
+
+function openSuggestion() {
+  suggestionDone.value = false;
+  suggestionMessage.value = '';
+  suggestionOpen.value = true;
+}
+
+function closeSuggestion() {
+  suggestionOpen.value = false;
 }
 
 onMounted(() => {
@@ -441,4 +469,51 @@ onUnmounted(() => {
       </article>
     </section>
   </div>
+
+  <button class="suggestion-fab" type="button" @click="openSuggestion" :aria-label="t('suggestionButtonLabel')">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+    <span>{{ t('suggestionButtonLabel') }}</span>
+  </button>
+
+  <transition name="modal">
+    <div v-if="suggestionOpen" class="modal-overlay" @click.self="closeSuggestion">
+      <div class="modal-box suggestion-modal" role="dialog" :aria-label="t('suggestionTitle')">
+        <div class="modal-header">
+          <h2>{{ t('suggestionTitle') }}</h2>
+          <button type="button" class="modal-close" @click="closeSuggestion" aria-label="Close">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <div v-if="suggestionDone" class="suggestion-sent">
+          <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="suggestion-sent-icon">
+            <circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/>
+          </svg>
+          <p>{{ t('suggestionSent') }}</p>
+          <button type="button" class="secondary" @click="closeSuggestion">{{ t('cancel') }}</button>
+        </div>
+
+        <form v-else class="suggestion-form" @submit.prevent="submitSuggestion">
+          <p class="suggestion-subtitle">{{ t('suggestionSubtitle') }}</p>
+          <textarea
+            v-model="suggestionMessage"
+            class="suggestion-textarea"
+            :placeholder="t('suggestionPlaceholder')"
+            rows="5"
+            maxlength="2000"
+            required
+            autofocus
+          ></textarea>
+          <div class="suggestion-footer">
+            <span class="suggestion-count">{{ suggestionMessage.length }} / 2000</span>
+            <button type="submit" :disabled="suggestionSending || !suggestionMessage.trim()">{{ t('suggestionSend') }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </transition>
 </template>

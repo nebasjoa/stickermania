@@ -30,6 +30,14 @@ const browserTimeZone = computed(() => Intl.DateTimeFormat().resolvedOptions().t
         </div>
       </nav>
 
+      <nav class="footer-block" aria-label="Legal">
+        <p class="footer-heading">{{ t('footerLegal') }}</p>
+        <div class="footer-links">
+          <RouterLink to="/terms">{{ t('footerTerms') }}</RouterLink>
+          <RouterLink to="/privacy">{{ t('footerPrivacy') }}</RouterLink>
+        </div>
+      </nav>
+
       <section class="footer-block">
         <p class="footer-heading">{{ t('footerUsefulInfo') }}</p>
         <div class="footer-meta">

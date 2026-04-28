@@ -140,6 +140,15 @@ ALTER TABLE trade_requests
 ALTER TABLE trade_requests
   ADD COLUMN cancellation_reason VARCHAR(255) NOT NULL DEFAULT '';
 
+CREATE TABLE IF NOT EXISTS suggestions (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT NULL,
+  message TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_suggestion_user
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
 CREATE TABLE IF NOT EXISTS meetup_attendees (
   id INT PRIMARY KEY AUTO_INCREMENT,
   meetup_id INT NOT NULL,

@@ -3432,3 +3432,185 @@ button.danger:hover:not(:disabled) {
 .badge-card.locked .badge-desc {
   color: var(--text-subtle);
 }
+
+/* Suggestion FAB */
+.suggestion-fab {
+  position: fixed;
+  bottom: 1.75rem;
+  right: 1.75rem;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 1.1rem 0.6rem 0.9rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.22);
+  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+.suggestion-fab:hover {
+  background: var(--accent-hover, #1d6dbd);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.28);
+}
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-box {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+}
+.modal-close:hover { background: var(--border); color: var(--text); }
+
+/* Suggestion form */
+.suggestion-subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.suggestion-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.suggestion-textarea {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--input-bg, var(--bg));
+  color: var(--text);
+  font-size: 0.9rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 110px;
+  box-sizing: border-box;
+}
+.suggestion-textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
+
+.suggestion-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.suggestion-count {
+  font-size: 0.78rem;
+  color: var(--text-subtle);
+}
+
+/* Sent state */
+.suggestion-sent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0 0.25rem;
+  text-align: center;
+}
+.suggestion-sent-icon { color: #22c55e; }
+.suggestion-sent p { margin: 0; font-size: 0.95rem; color: var(--text); }
+
+/* Modal transition */
+.modal-enter-active, .modal-leave-active { transition: opacity 0.18s ease; }
+.modal-enter-from, .modal-leave-to { opacity: 0; }
+.modal-enter-active .modal-box, .modal-leave-active .modal-box { transition: transform 0.18s ease; }
+.modal-enter-from .modal-box, .modal-leave-to .modal-box { transform: translateY(12px) scale(0.97); }
+
+/* Legal pages */
+.legal-page { max-width: 760px; margin: 0 auto; }
+
+.legal-card { padding: 2rem 2.5rem; }
+
+.legal-header {
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.legal-header h1 { margin: 0.25rem 0 0.5rem; font-size: 1.75rem; }
+
+.legal-date { margin: 0; font-size: 0.82rem; color: var(--text-muted); }
+
+.legal-body { display: flex; flex-direction: column; gap: 0; }
+
+.legal-body p,
+.legal-body ul { font-size: 0.925rem; line-height: 1.7; color: var(--text); margin: 0 0 1rem; }
+
+.legal-body h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 1.75rem 0 0.5rem;
+  color: var(--text);
+}
+
+.legal-body h2:first-of-type { margin-top: 0; }
+
+.legal-body ul { padding-left: 1.4rem; }
+
+.legal-body ul li { margin-bottom: 0.35rem; }
+
+.legal-body code {
+  font-size: 0.83em;
+  background: var(--border);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+}
+
+@media (max-width: 600px) {
+  .legal-card { padding: 1.25rem 1rem; }
+}

@@ -10,6 +10,7 @@ import userRoutes from './server/routes/users.js';
 import tradeRoutes from './server/routes/trades.js';
 import meetupRoutes from './server/routes/meetups.js';
 import predictionRoutes from './server/routes/predictions.js';
+import suggestionRoutes from './server/routes/suggestions.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,6 +27,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/trades', tradeRoutes);
 app.use('/api/meetups', meetupRoutes);
 app.use('/api/predictions', predictionRoutes);
+app.use('/api/suggestions', suggestionRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true });
