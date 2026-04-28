@@ -3472,7 +3472,7 @@ button.danger:hover:not(:disabled) {
 }
 
 .modal-box {
-  background: var(--card-bg);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   width: 100%;
