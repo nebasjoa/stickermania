@@ -11,6 +11,7 @@ import tradeRoutes from './server/routes/trades.js';
 import meetupRoutes from './server/routes/meetups.js';
 import predictionRoutes from './server/routes/predictions.js';
 import suggestionRoutes from './server/routes/suggestions.js';
+import sitemapRoute from './server/routes/sitemap.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,6 +33,8 @@ app.use('/api/suggestions', suggestionRoutes);
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true });
 });
+
+app.get('/sitemap.xml', sitemapRoute);
 
 app.use(express.static(distPath));
 
