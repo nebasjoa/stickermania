@@ -1,8 +1,5 @@
-import express from 'express';
 import { articles } from '../../src/data/news.js';
 import { query } from '../db.js';
-
-const router = express.Router();
 
 const BASE_URL = (process.env.BASE_URL || 'https://worldcupstuff.com').replace(/\/$/, '');
 
@@ -19,7 +16,7 @@ function urlEntry(loc, lastmod, changefreq, priority) {
   ].join('\n');
 }
 
-router.get('/', async (_req, res) => {
+export default async function sitemapHandler(_req, res) {
   const meetups = await query(
     'SELECT id, created_at FROM meetups ORDER BY created_at DESC'
   );
@@ -27,16 +24,16 @@ router.get('/', async (_req, res) => {
   const t = today();
 
   const staticEntries = [
-    urlEntry('/',                       t,            'daily',   '1.0'),
-    urlEntry('/search',                 t,            'daily',   '0.9'),
-    urlEntry('/meetups',                t,            'daily',   '0.8'),
-    urlEntry('/predictions',            t,            'daily',   '0.8'),
-    urlEntry('/predictions/leaderboard',t,            'daily',   '0.7'),
-    urlEntry('/news',                   t,            'weekly',  '0.8'),
-    urlEntry('/login',                  '2026-04-21', 'monthly', '0.5'),
-    urlEntry('/register',               '2026-04-21', 'monthly', '0.5'),
-    urlEntry('/terms',                  '2026-04-28', 'monthly', '0.3'),
-    urlEntry('/privacy',                '2026-04-28', 'monthly', '0.3'),
+    urlEntry('/',                        t,            'daily',   '1.0'),
+    urlEntry('/search',                  t,            'daily',   '0.9'),
+    urlEntry('/meetups',                 t,            'daily',   '0.8'),
+    urlEntry('/predictions',             t,            'daily',   '0.8'),
+    urlEntry('/predictions/leaderboard', t,            'daily',   '0.7'),
+    urlEntry('/news',                    t,            'weekly',  '0.8'),
+    urlEntry('/login',                   '2026-04-21', 'monthly', '0.5'),
+    urlEntry('/register',                '2026-04-21', 'monthly', '0.5'),
+    urlEntry('/terms',                   '2026-04-28', 'monthly', '0.3'),
+    urlEntry('/privacy',                 '2026-04-28', 'monthly', '0.3'),
   ];
 
   const newsEntries = articles.map((a) =>
@@ -64,6 +61,4 @@ router.get('/', async (_req, res) => {
   res.setHeader('Content-Type', 'application/xml; charset=utf-8');
   res.setHeader('Cache-Control', 'public, max-age=3600');
   res.send(xml);
-});
-
-export default router;
+}
