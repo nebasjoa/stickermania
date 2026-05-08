@@ -13,6 +13,17 @@ import {
 
 const { t } = useI18n();
 const router = useRouter();
+
+const collectedSearch = ref('');
+const offersSearch = ref('');
+
+function filterGroups(searchTerm) {
+  if (!searchTerm.trim()) return STICKER_GROUPS;
+  const q = searchTerm.trim().toUpperCase();
+  return STICKER_GROUPS
+    .map((g) => ({ label: g.label, codes: g.codes.filter((c) => c.includes(q)) }))
+    .filter((g) => g.codes.length > 0);
+}
 const showDeleteAccountModal = ref(false);
 
 const earnedBadgeIds = computed(() => {
@@ -163,8 +174,9 @@ function closeDeleteAccountModal() {
             <button type="button" class="secondary" @click="selectAllCollectedStickers">{{ t('selectAll') }}</button>
             <button type="button" class="secondary" @click="clearAllCollectedStickers">{{ t('deselectAll') }}</button>
           </div>
+          <input v-model="collectedSearch" class="sticker-search" placeholder="Search sticker e.g. AUS1, FWC…" autocomplete="off" />
           <div class="sticker-groups">
-            <div v-for="group in STICKER_GROUPS" :key="group.label" class="sticker-group">
+            <div v-for="group in filterGroups(collectedSearch)" :key="group.label" class="sticker-group">
               <p class="sticker-group-label">{{ group.label }}</p>
               <div class="sticker-grid">
                 <button
@@ -186,8 +198,9 @@ function closeDeleteAccountModal() {
             <button type="button" class="secondary" @click="selectAllStickers(profileForm, 'offers')">{{ t('selectAll') }}</button>
             <button type="button" class="secondary" @click="clearAllStickers(profileForm, 'offers')">{{ t('deselectAll') }}</button>
           </div>
+          <input v-model="offersSearch" class="sticker-search" placeholder="Search sticker e.g. AUS1, FWC…" autocomplete="off" />
           <div class="sticker-groups">
-            <div v-for="group in STICKER_GROUPS" :key="group.label" class="sticker-group">
+            <div v-for="group in filterGroups(offersSearch)" :key="group.label" class="sticker-group">
               <p class="sticker-group-label">{{ group.label }}</p>
               <div class="sticker-grid">
                 <button
