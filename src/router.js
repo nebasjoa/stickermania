@@ -16,6 +16,7 @@ import NewsView from './views/NewsView.vue';
 import NewsArticleView from './views/NewsArticleView.vue';
 import TermsView from './views/TermsView.vue';
 import PrivacyView from './views/PrivacyView.vue';
+import PublicProfileView from './views/PublicProfileView.vue';
 
 const LOCALE_CODES = { en: 'en', fr: 'fr', de: 'de', rs: 'sr' };
 
@@ -31,7 +32,8 @@ const router = createRouter({
     { path: '/trades',      component: TradesView, meta: { requiresAuth: true } },
     { path: '/login',       component: LoginView, meta: { guestOnly: true } },
     { path: '/register',    component: RegisterView, meta: { guestOnly: true } },
-    { path: '/profile',     component: ProfileView, meta: { requiresAuth: true } },
+    { path: '/profile',          component: ProfileView, meta: { requiresAuth: true } },
+    { path: '/profile/:username', component: PublicProfileView },
     { path: '/account',     redirect: () => (isAuthenticated.value ? '/profile' : '/login') },
     { path: '/admin',       component: AdminView, meta: { requiresAuth: true, requiresAdmin: true } },
     { path: '/news',        component: NewsView },

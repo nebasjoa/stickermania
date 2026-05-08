@@ -3612,6 +3612,63 @@ button.danger:hover:not(:disabled) {
 
 .legal-body ul li { margin-bottom: 0.35rem; }
 
+/* Public profile */
+.public-profile-loading { padding: 2rem; text-align: center; color: var(--text-muted); }
+
+.public-profile-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.public-profile-username { margin: 0 0 0.2rem; font-size: 1.4rem; }
+
+.public-profile-location { margin: 0; color: var(--text-muted); font-size: 0.9rem; }
+
+.public-profile-section-title { margin: 0 0 1rem; font-size: 1rem; }
+
+.public-profile-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.public-profile-table th {
+  text-align: left;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  border-bottom: 1.5px solid var(--border);
+}
+
+.public-profile-table td {
+  padding: 0.45rem 0.6rem;
+  border-bottom: 1px solid var(--border-light, var(--border));
+  vertical-align: top;
+}
+
+.pub-row-empty td { opacity: 0.4; }
+
+.pub-col-label { white-space: nowrap; font-weight: 500; width: 160px; }
+
+.pub-col-count { white-space: nowrap; width: 60px; color: var(--text-muted); }
+
+.pub-col-stickers .sticker-list { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+
+.pub-chip {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 0.72rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+}
+
 .legal-body code {
   font-size: 0.83em;
   background: var(--border);

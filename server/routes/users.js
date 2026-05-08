@@ -102,6 +102,43 @@ router.get('/search', requireAuth, async (req, res) => {
   });
 });
 
+router.get('/profile/:username', async (req, res) => {
+  const username = String(req.params.username || '').trim();
+  if (!username) return res.status(400).json({ message: 'Username required.' });
+
+  const rows = await query(
+    `SELECT u.id, u.username, u.country, u.city, u.postal_trade_enabled,
+            us.sticker_number, us.sticker_type
+     FROM users u
+     LEFT JOIN user_stickers us ON us.user_id = u.id
+     WHERE u.username = ? AND u.is_verified = 1`,
+    [username]
+  );
+
+  if (!rows.length) return res.status(404).json({ message: 'User not found.' });
+
+  const first = rows[0];
+  const needs = [];
+  const offers = [];
+  for (const row of rows) {
+    if (row.sticker_number) {
+      if (row.sticker_type === 'need') needs.push(row.sticker_number);
+      else offers.push(row.sticker_number);
+    }
+  }
+
+  return res.json({
+    user: {
+      username: first.username,
+      country: first.country || '',
+      city: first.city || '',
+      postalTradeEnabled: Boolean(first.postal_trade_enabled),
+      needs: sortStickerNumbers(needs),
+      offers: sortStickerNumbers(offers),
+    }
+  });
+});
+
 router.put('/me/stickers', requireAuth, async (req, res) => {
   const needs = normalizeStickerNumbers(req.body.needs || '');
   const offers = normalizeStickerNumbers(req.body.offers || '');
