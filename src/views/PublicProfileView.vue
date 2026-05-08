@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { STICKER_CODES, STICKER_GROUPS } from '../data/stickers.js';
 import LocationLabel from '../components/LocationLabel.vue';
+import { getCountryFlagCode } from '../utils/countryFlags.js';
 import api from '../api.js';
 
 const { t } = useI18n();
@@ -27,7 +28,8 @@ const collectedPercentLabel = computed(() => collectedPercent.value.toFixed(1));
 const groupRows = computed(() =>
   STICKER_GROUPS.flatMap((g) =>
     g.teams.map((team) => ({
-      label: `${team.flag} ${team.label}`,
+      label: team.label,
+      flagCode: getCountryFlagCode(team.label),
       total: team.codes.length,
       collected: team.codes.filter((c) => !needsSet.value.has(c)),
     }))
@@ -97,7 +99,10 @@ onMounted(async () => {
           </thead>
           <tbody>
             <tr v-for="row in groupRows" :key="row.label" :class="{ 'pub-row-empty': row.collected.length === 0 }">
-              <td class="pub-col-label">{{ row.label }}</td>
+              <td class="pub-col-label">
+                <span v-if="row.flagCode" :class="`fi fi-${row.flagCode}`" class="country-label-flag" aria-hidden="true"></span>
+                {{ row.label }}
+              </td>
               <td class="pub-col-count">{{ row.collected.length }}&thinsp;/&thinsp;{{ row.total }}</td>
               <td class="pub-col-stickers">
                 <span v-if="row.collected.length === 0" class="text-muted">—</span>
