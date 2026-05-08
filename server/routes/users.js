@@ -9,10 +9,13 @@ const router = express.Router();
 // Returns the 8 most recently verified collectors.
 router.get('/recent', async (req, res) => {
   const rows = await query(
-    `SELECT id, username, country, city, created_at
-     FROM users
-     WHERE is_verified = 1
-     ORDER BY created_at DESC
+    `SELECT u.id, u.username, u.country, u.city, u.created_at,
+            CAST(COUNT(CASE WHEN us.sticker_type = 'need' THEN 1 END) AS UNSIGNED) AS needs_count
+     FROM users u
+     LEFT JOIN user_stickers us ON us.user_id = u.id
+     WHERE u.is_verified = 1
+     GROUP BY u.id
+     ORDER BY u.created_at DESC
      LIMIT 8`
   );
   return res.json({ users: rows });

@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n';
 import locations from '../data/locations.json';
 import CountrySelect from '../components/CountrySelect.vue';
 import { BADGES, computeEarnedBadges } from '../utils/badges.js';
-import { STICKER_CODES, STICKER_GROUPS, STICKER_INDEX, stickerDisplay } from '../data/stickers.js';
+import { STICKER_CODES, STICKER_GROUPS, STICKER_INDEX } from '../data/stickers.js';
 import {
   completedPredictionsCount, currentUser, deleteAccountPermanently, exportPersonalData,
   loading, meetups, predictions, profileForm, saveProfile, trades
@@ -21,8 +21,13 @@ function filterGroups(searchTerm) {
   if (!searchTerm.trim()) return STICKER_GROUPS;
   const q = searchTerm.trim().toUpperCase();
   return STICKER_GROUPS
-    .map((g) => ({ label: g.label, codes: g.codes.filter((c) => c.includes(q)) }))
-    .filter((g) => g.codes.length > 0);
+    .map((wcGroup) => ({
+      label: wcGroup.label,
+      teams: wcGroup.teams
+        .map((team) => ({ label: team.label, flag: team.flag, codes: team.codes.filter((c) => c.includes(q)) }))
+        .filter((team) => team.codes.length > 0),
+    }))
+    .filter((wcGroup) => wcGroup.teams.length > 0);
 }
 const showDeleteAccountModal = ref(false);
 
@@ -176,19 +181,22 @@ function closeDeleteAccountModal() {
           </div>
           <input v-model="collectedSearch" class="sticker-search" placeholder="Search sticker e.g. AUS1, FWC…" autocomplete="off" />
           <div class="sticker-groups">
-            <div v-for="group in filterGroups(collectedSearch)" :key="group.label" class="sticker-group">
-              <p class="sticker-group-label">{{ group.label }}</p>
-              <div class="sticker-grid">
-                <button
-                  v-for="sticker in group.codes"
-                  :key="`profile-needs-${sticker}`"
-                  type="button"
-                  class="sticker-tile"
-                  :class="{ selected: isProfileStickerCollected(sticker) }"
-                  @click="toggleProfileCollectedSticker(sticker)"
-                >{{ sticker }}</button>
+            <details v-for="wcGroup in filterGroups(collectedSearch)" :key="wcGroup.label" class="sticker-wc-group" open>
+              <summary class="sticker-wc-group-summary">{{ wcGroup.label }}</summary>
+              <div v-for="team in wcGroup.teams" :key="team.label" class="sticker-group">
+                <p class="sticker-group-label">{{ team.flag }} {{ team.label }}</p>
+                <div class="sticker-grid">
+                  <button
+                    v-for="sticker in team.codes"
+                    :key="`profile-needs-${sticker}`"
+                    type="button"
+                    class="sticker-tile"
+                    :class="{ selected: isProfileStickerCollected(sticker) }"
+                    @click="toggleProfileCollectedSticker(sticker)"
+                  >{{ sticker }}</button>
+                </div>
               </div>
-            </div>
+            </details>
           </div>
         </details>
 
@@ -200,19 +208,22 @@ function closeDeleteAccountModal() {
           </div>
           <input v-model="offersSearch" class="sticker-search" placeholder="Search sticker e.g. AUS1, FWC…" autocomplete="off" />
           <div class="sticker-groups">
-            <div v-for="group in filterGroups(offersSearch)" :key="group.label" class="sticker-group">
-              <p class="sticker-group-label">{{ group.label }}</p>
-              <div class="sticker-grid">
-                <button
-                  v-for="sticker in group.codes"
-                  :key="`profile-offers-${sticker}`"
-                  type="button"
-                  class="sticker-tile"
-                  :class="{ selected: isStickerSelected(profileForm, 'offers', sticker) }"
-                  @click="toggleSticker(profileForm, 'offers', sticker)"
-                >{{ sticker }}</button>
+            <details v-for="wcGroup in filterGroups(offersSearch)" :key="wcGroup.label" class="sticker-wc-group" open>
+              <summary class="sticker-wc-group-summary">{{ wcGroup.label }}</summary>
+              <div v-for="team in wcGroup.teams" :key="team.label" class="sticker-group">
+                <p class="sticker-group-label">{{ team.flag }} {{ team.label }}</p>
+                <div class="sticker-grid">
+                  <button
+                    v-for="sticker in team.codes"
+                    :key="`profile-offers-${sticker}`"
+                    type="button"
+                    class="sticker-tile"
+                    :class="{ selected: isStickerSelected(profileForm, 'offers', sticker) }"
+                    @click="toggleSticker(profileForm, 'offers', sticker)"
+                  >{{ sticker }}</button>
+                </div>
               </div>
-            </div>
+            </details>
           </div>
         </details>
 

@@ -1038,6 +1038,46 @@ small {
   padding: 0.25rem 0.1rem;
 }
 
+.sticker-wc-group {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.sticker-wc-group-summary {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  padding: 0.55rem 0.75rem;
+  cursor: pointer;
+  background: var(--surface-raised);
+  user-select: none;
+  list-style: none;
+}
+
+.sticker-wc-group-summary::-webkit-details-marker {
+  display: none;
+}
+
+.sticker-wc-group-summary::before {
+  content: '▶';
+  display: inline-block;
+  margin-right: 0.5rem;
+  font-size: 0.6rem;
+  transition: transform 0.15s;
+  vertical-align: middle;
+}
+
+.sticker-wc-group[open] > .sticker-wc-group-summary::before {
+  transform: rotate(90deg);
+}
+
+.sticker-wc-group[open] > .sticker-group {
+  padding: 0.5rem 0.75rem;
+}
+
 .sticker-group-label {
   font-size: 0.72rem;
   font-weight: 700;
@@ -3613,6 +3653,20 @@ button.danger:hover:not(:disabled) {
 .legal-body ul li { margin-bottom: 0.35rem; }
 
 /* Public profile */
+.home-panel-item-progress {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.collector-username-link {
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+}
+.collector-username-link:hover { color: var(--accent); text-decoration: underline; }
+
 .public-profile-loading { padding: 2rem; text-align: center; color: var(--text-muted); }
 
 .public-profile-top {

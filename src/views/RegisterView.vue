@@ -4,7 +4,7 @@ import { RouterLink, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import locations from '../data/locations.json';
 import CountrySelect from '../components/CountrySelect.vue';
-import { STICKER_CODES, STICKER_GROUPS, STICKER_INDEX, stickerDisplay } from '../data/stickers.js';
+import { STICKER_CODES, STICKER_GROUPS, STICKER_INDEX } from '../data/stickers.js';
 import {
   handleRegister, isAuthenticated, loading, registerForm, setStatus
 } from '../store.js';
@@ -115,19 +115,22 @@ async function submitRegister() {
             <button type="button" class="secondary" @click="clearAllStickers(registerForm, 'needs')">{{ t('deselectAll') }}</button>
           </div>
           <div class="sticker-groups">
-            <div v-for="group in STICKER_GROUPS" :key="group.label" class="sticker-group">
-              <p class="sticker-group-label">{{ group.label }}</p>
-              <div class="sticker-grid">
-                <button
-                  v-for="sticker in group.codes"
-                  :key="`register-needs-${sticker}`"
-                  type="button"
-                  class="sticker-tile"
-                  :class="{ selected: isStickerSelected(registerForm, 'needs', sticker) }"
-                  @click="toggleSticker(registerForm, 'needs', sticker)"
-                >{{ sticker }}</button>
+            <details v-for="wcGroup in STICKER_GROUPS" :key="wcGroup.label" class="sticker-wc-group" open>
+              <summary class="sticker-wc-group-summary">{{ wcGroup.label }}</summary>
+              <div v-for="team in wcGroup.teams" :key="team.label" class="sticker-group">
+                <p class="sticker-group-label">{{ team.flag }} {{ team.label }}</p>
+                <div class="sticker-grid">
+                  <button
+                    v-for="sticker in team.codes"
+                    :key="`register-needs-${sticker}`"
+                    type="button"
+                    class="sticker-tile"
+                    :class="{ selected: isStickerSelected(registerForm, 'needs', sticker) }"
+                    @click="toggleSticker(registerForm, 'needs', sticker)"
+                  >{{ sticker }}</button>
+                </div>
               </div>
-            </div>
+            </details>
           </div>
         </details>
 
@@ -138,19 +141,22 @@ async function submitRegister() {
             <button type="button" class="secondary" @click="clearAllStickers(registerForm, 'offers')">{{ t('deselectAll') }}</button>
           </div>
           <div class="sticker-groups">
-            <div v-for="group in STICKER_GROUPS" :key="group.label" class="sticker-group">
-              <p class="sticker-group-label">{{ group.label }}</p>
-              <div class="sticker-grid">
-                <button
-                  v-for="sticker in group.codes"
-                  :key="`register-offers-${sticker}`"
-                  type="button"
-                  class="sticker-tile"
-                  :class="{ selected: isStickerSelected(registerForm, 'offers', sticker) }"
-                  @click="toggleSticker(registerForm, 'offers', sticker)"
-                >{{ sticker }}</button>
+            <details v-for="wcGroup in STICKER_GROUPS" :key="wcGroup.label" class="sticker-wc-group" open>
+              <summary class="sticker-wc-group-summary">{{ wcGroup.label }}</summary>
+              <div v-for="team in wcGroup.teams" :key="team.label" class="sticker-group">
+                <p class="sticker-group-label">{{ team.flag }} {{ team.label }}</p>
+                <div class="sticker-grid">
+                  <button
+                    v-for="sticker in team.codes"
+                    :key="`register-offers-${sticker}`"
+                    type="button"
+                    class="sticker-tile"
+                    :class="{ selected: isStickerSelected(registerForm, 'offers', sticker) }"
+                    @click="toggleSticker(registerForm, 'offers', sticker)"
+                  >{{ sticker }}</button>
+                </div>
               </div>
-            </div>
+            </details>
           </div>
         </details>
 

@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import CountryLabel from '../components/CountryLabel.vue';
 import LocationLabel from '../components/LocationLabel.vue';
 import api from '../api.js';
+import { STICKER_CODES } from '../data/stickers.js';
 import {
   homeMeetups,
   homeLeaderboard,
@@ -14,6 +15,11 @@ import {
 } from '../store.js';
 
 const { t } = useI18n();
+
+const TOTAL_STICKERS = STICKER_CODES.length;
+function collectorProgress(needsCount) {
+  return Math.round(Math.max(0, (TOTAL_STICKERS - Number(needsCount)) / TOTAL_STICKERS * 100));
+}
 
 const KICKOFF = new Date('2026-06-11T19:00:00.000Z');
 const FINAL = new Date('2026-07-19T20:00:00.000Z');
@@ -463,9 +469,10 @@ onUnmounted(() => {
       <div v-if="!homeRecentCollectors.length" class="home-panel-empty">{{ t('noCollectorsYet') }}</div>
       <article v-for="collector in homeRecentCollectors" :key="`collector-${collector.id}`" class="home-panel-item">
         <div class="home-panel-item-top">
-          <strong>{{ collector.username }}</strong>
+          <RouterLink :to="`/profile/${collector.username}`" class="collector-username-link">{{ collector.username }}</RouterLink>
         </div>
         <p class="home-panel-item-sub"><LocationLabel :city="collector.city" :country="collector.country" /></p>
+        <p class="home-panel-item-progress">Progress: {{ collectorProgress(collector.needs_count) }}%</p>
       </article>
     </section>
   </div>

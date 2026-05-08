@@ -25,11 +25,13 @@ const collectedPercent = computed(() =>
 const collectedPercentLabel = computed(() => collectedPercent.value.toFixed(1));
 
 const groupRows = computed(() =>
-  STICKER_GROUPS.map((g) => ({
-    label: g.label,
-    total: g.codes.length,
-    collected: g.codes.filter((c) => !needsSet.value.has(c)),
-  }))
+  STICKER_GROUPS.flatMap((g) =>
+    g.teams.map((team) => ({
+      label: `${team.flag} ${team.label}`,
+      total: team.codes.length,
+      collected: team.codes.filter((c) => !needsSet.value.has(c)),
+    }))
+  )
 );
 
 onMounted(async () => {

@@ -12,7 +12,8 @@ const connectionConfig = {
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
   connectionLimit: 5,
-  multipleStatements: true
+  multipleStatements: true,
+  bigIntAsNumber: true
 };
 
 const databaseName = process.env.DB_NAME || 'stickermania';
