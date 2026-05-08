@@ -6,6 +6,7 @@ import locations from '../data/locations.json';
 import CountrySelect from '../components/CountrySelect.vue';
 import { BADGES, computeEarnedBadges } from '../utils/badges.js';
 import { STICKER_CODES, STICKER_GROUPS, STICKER_INDEX } from '../data/stickers.js';
+import { getCountryFlagCode } from '../utils/countryFlags.js';
 import {
   completedPredictionsCount, currentUser, deleteAccountPermanently, exportPersonalData,
   loading, meetups, predictions, profileForm, saveProfile, trades
@@ -184,7 +185,9 @@ function closeDeleteAccountModal() {
             <details v-for="wcGroup in filterGroups(collectedSearch)" :key="wcGroup.label" class="sticker-wc-group" open>
               <summary class="sticker-wc-group-summary">{{ wcGroup.label }}</summary>
               <div v-for="team in wcGroup.teams" :key="team.label" class="sticker-group">
-                <p class="sticker-group-label">{{ team.flag }} {{ team.label }}</p>
+                <p class="sticker-group-label">
+                <span v-if="getCountryFlagCode(team.label)" :class="`fi fi-${getCountryFlagCode(team.label)}`" class="country-label-flag" aria-hidden="true"></span>{{ team.label }}
+              </p>
                 <div class="sticker-grid">
                   <button
                     v-for="sticker in team.codes"
@@ -211,7 +214,9 @@ function closeDeleteAccountModal() {
             <details v-for="wcGroup in filterGroups(offersSearch)" :key="wcGroup.label" class="sticker-wc-group" open>
               <summary class="sticker-wc-group-summary">{{ wcGroup.label }}</summary>
               <div v-for="team in wcGroup.teams" :key="team.label" class="sticker-group">
-                <p class="sticker-group-label">{{ team.flag }} {{ team.label }}</p>
+                <p class="sticker-group-label">
+                <span v-if="getCountryFlagCode(team.label)" :class="`fi fi-${getCountryFlagCode(team.label)}`" class="country-label-flag" aria-hidden="true"></span>{{ team.label }}
+              </p>
                 <div class="sticker-grid">
                   <button
                     v-for="sticker in team.codes"

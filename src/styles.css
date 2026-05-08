@@ -1079,6 +1079,9 @@ small {
 }
 
 .sticker-group-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -1089,17 +1092,17 @@ small {
 
 .sticker-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-  gap: 0.3rem;
+  grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+  gap: 0.25rem;
 }
 
 .sticker-tile {
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 0.35rem 0.1rem;
+  padding: 0.3rem 0.05rem;
   background: var(--surface);
   color: var(--text-muted);
-  font-size: 0.8rem;
+  font-size: 0.68rem;
   font-weight: 500;
   box-shadow: none;
   transition: all 0.12s ease;

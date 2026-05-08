@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import locations from '../data/locations.json';
 import CountrySelect from '../components/CountrySelect.vue';
 import { STICKER_CODES, STICKER_GROUPS, STICKER_INDEX } from '../data/stickers.js';
+import { getCountryFlagCode } from '../utils/countryFlags.js';
 import {
   handleRegister, isAuthenticated, loading, registerForm, setStatus
 } from '../store.js';
@@ -118,7 +119,9 @@ async function submitRegister() {
             <details v-for="wcGroup in STICKER_GROUPS" :key="wcGroup.label" class="sticker-wc-group" open>
               <summary class="sticker-wc-group-summary">{{ wcGroup.label }}</summary>
               <div v-for="team in wcGroup.teams" :key="team.label" class="sticker-group">
-                <p class="sticker-group-label">{{ team.flag }} {{ team.label }}</p>
+                <p class="sticker-group-label">
+                <span v-if="getCountryFlagCode(team.label)" :class="`fi fi-${getCountryFlagCode(team.label)}`" class="country-label-flag" aria-hidden="true"></span>{{ team.label }}
+              </p>
                 <div class="sticker-grid">
                   <button
                     v-for="sticker in team.codes"
@@ -144,7 +147,9 @@ async function submitRegister() {
             <details v-for="wcGroup in STICKER_GROUPS" :key="wcGroup.label" class="sticker-wc-group" open>
               <summary class="sticker-wc-group-summary">{{ wcGroup.label }}</summary>
               <div v-for="team in wcGroup.teams" :key="team.label" class="sticker-group">
-                <p class="sticker-group-label">{{ team.flag }} {{ team.label }}</p>
+                <p class="sticker-group-label">
+                <span v-if="getCountryFlagCode(team.label)" :class="`fi fi-${getCountryFlagCode(team.label)}`" class="country-label-flag" aria-hidden="true"></span>{{ team.label }}
+              </p>
                 <div class="sticker-grid">
                   <button
                     v-for="sticker in team.codes"
