@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import locations from '../data/locations.json';
 import CountrySelect from '../components/CountrySelect.vue';
 import { BADGES, computeEarnedBadges } from '../utils/badges.js';
+import { STICKER_CODES, STICKER_GROUPS, STICKER_INDEX, stickerDisplay } from '../data/stickers.js';
 import {
   completedPredictionsCount, currentUser, deleteAccountPermanently, exportPersonalData,
   loading, meetups, predictions, profileForm, saveProfile, trades
@@ -28,7 +29,7 @@ const badgesByCategory = computed(() => {
   }));
 });
 
-const stickerNumbers = Array.from({ length: 980 }, (_, i) => String(i + 1));
+const stickerNumbers = STICKER_CODES;
 const totalStickerCount = stickerNumbers.length;
 const countryOptions = Object.keys(locations).sort((a, b) => a.localeCompare(b));
 const collectedStickerCount = computed(() => totalStickerCount - profileForm.needs.length);
@@ -46,7 +47,7 @@ function toggleSticker(form, key, sticker) {
     return;
   }
   list.push(sticker);
-  list.sort((a, b) => Number(a) - Number(b));
+  list.sort((a, b) => (STICKER_INDEX.get(a) ?? Infinity) - (STICKER_INDEX.get(b) ?? Infinity));
 }
 
 function isStickerSelected(form, key, sticker) {
@@ -162,15 +163,20 @@ function closeDeleteAccountModal() {
             <button type="button" class="secondary" @click="selectAllCollectedStickers">{{ t('selectAll') }}</button>
             <button type="button" class="secondary" @click="clearAllCollectedStickers">{{ t('deselectAll') }}</button>
           </div>
-          <div class="sticker-grid">
-            <button
-              v-for="sticker in stickerNumbers"
-              :key="`profile-needs-${sticker}`"
-              type="button"
-              class="sticker-tile"
-              :class="{ selected: isProfileStickerCollected(sticker) }"
-              @click="toggleProfileCollectedSticker(sticker)"
-            >{{ sticker }}</button>
+          <div class="sticker-groups">
+            <div v-for="group in STICKER_GROUPS" :key="group.label" class="sticker-group">
+              <p class="sticker-group-label">{{ group.label }}</p>
+              <div class="sticker-grid">
+                <button
+                  v-for="sticker in group.codes"
+                  :key="`profile-needs-${sticker}`"
+                  type="button"
+                  class="sticker-tile"
+                  :class="{ selected: isProfileStickerCollected(sticker) }"
+                  @click="toggleProfileCollectedSticker(sticker)"
+                >{{ sticker }}</button>
+              </div>
+            </div>
           </div>
         </details>
 
@@ -180,15 +186,20 @@ function closeDeleteAccountModal() {
             <button type="button" class="secondary" @click="selectAllStickers(profileForm, 'offers')">{{ t('selectAll') }}</button>
             <button type="button" class="secondary" @click="clearAllStickers(profileForm, 'offers')">{{ t('deselectAll') }}</button>
           </div>
-          <div class="sticker-grid">
-            <button
-              v-for="sticker in stickerNumbers"
-              :key="`profile-offers-${sticker}`"
-              type="button"
-              class="sticker-tile"
-              :class="{ selected: isStickerSelected(profileForm, 'offers', sticker) }"
-              @click="toggleSticker(profileForm, 'offers', sticker)"
-            >{{ sticker }}</button>
+          <div class="sticker-groups">
+            <div v-for="group in STICKER_GROUPS" :key="group.label" class="sticker-group">
+              <p class="sticker-group-label">{{ group.label }}</p>
+              <div class="sticker-grid">
+                <button
+                  v-for="sticker in group.codes"
+                  :key="`profile-offers-${sticker}`"
+                  type="button"
+                  class="sticker-tile"
+                  :class="{ selected: isStickerSelected(profileForm, 'offers', sticker) }"
+                  @click="toggleSticker(profileForm, 'offers', sticker)"
+                >{{ sticker }}</button>
+              </div>
+            </div>
           </div>
         </details>
 

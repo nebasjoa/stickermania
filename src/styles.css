@@ -1023,32 +1023,32 @@ small {
   padding: 0.38rem 0.85rem;
 }
 
-.sticker-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-  gap: 0.38rem;
-  max-height: 290px;
-  overflow-y: auto;
+.sticker-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   padding: 0.25rem 0.1rem;
 }
 
-.sticker-grid::-webkit-scrollbar {
-  width: 4px;
+.sticker-group-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin: 0 0 0.3rem;
 }
 
-.sticker-grid::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sticker-grid::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: 99px;
+.sticker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  gap: 0.3rem;
 }
 
 .sticker-tile {
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 0.5rem 0.2rem;
+  padding: 0.35rem 0.1rem;
   background: var(--surface);
   color: var(--text-muted);
   font-size: 0.8rem;

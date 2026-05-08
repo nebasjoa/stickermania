@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import locations from '../data/locations.json';
 import CountrySelect from '../components/CountrySelect.vue';
+import { STICKER_CODES, STICKER_GROUPS, STICKER_INDEX, stickerDisplay } from '../data/stickers.js';
 import {
   isAuthenticated, loading, profileForm, registerForm, loginForm, verificationToken,
   completedPredictionsCount, predictions,
@@ -23,7 +24,7 @@ const resetPasswordNew = ref('');
 const resetPasswordConfirm = ref('');
 const resetPasswordsDontMatch = ref(false);
 
-const stickerNumbers = Array.from({ length: 980 }, (_, i) => String(i + 1));
+const stickerNumbers = STICKER_CODES;
 const registerRepeatPassword = ref('');
 const totalStickerCount = stickerNumbers.length;
 
@@ -46,7 +47,7 @@ function toggleSticker(form, key, sticker) {
   const idx = list.indexOf(sticker);
   if (idx >= 0) { list.splice(idx, 1); return; }
   list.push(sticker);
-  list.sort((a, b) => Number(a) - Number(b));
+  list.sort((a, b) => (STICKER_INDEX.get(a) ?? Infinity) - (STICKER_INDEX.get(b) ?? Infinity));
 }
 
 function isStickerSelected(form, key, sticker) {
@@ -213,15 +214,20 @@ async function submitResetPassword() {
             <button type="button" class="secondary" @click="selectAllStickers(registerForm, 'needs')">{{ t('selectAll') }}</button>
             <button type="button" class="secondary" @click="clearAllStickers(registerForm, 'needs')">{{ t('deselectAll') }}</button>
           </div>
-          <div class="sticker-grid">
-            <button
-              v-for="sticker in stickerNumbers"
-              :key="`register-needs-${sticker}`"
-              type="button"
-              class="sticker-tile"
-              :class="{ selected: isStickerSelected(registerForm, 'needs', sticker) }"
-              @click="toggleSticker(registerForm, 'needs', sticker)"
-            >{{ sticker }}</button>
+          <div class="sticker-groups">
+            <div v-for="group in STICKER_GROUPS" :key="group.label" class="sticker-group">
+              <p class="sticker-group-label">{{ group.label }}</p>
+              <div class="sticker-grid">
+                <button
+                  v-for="sticker in group.codes"
+                  :key="`register-needs-${sticker}`"
+                  type="button"
+                  class="sticker-tile"
+                  :class="{ selected: isStickerSelected(registerForm, 'needs', sticker) }"
+                  @click="toggleSticker(registerForm, 'needs', sticker)"
+                >{{ sticker }}</button>
+              </div>
+            </div>
           </div>
         </details>
 
@@ -231,15 +237,20 @@ async function submitResetPassword() {
             <button type="button" class="secondary" @click="selectAllStickers(registerForm, 'offers')">{{ t('selectAll') }}</button>
             <button type="button" class="secondary" @click="clearAllStickers(registerForm, 'offers')">{{ t('deselectAll') }}</button>
           </div>
-          <div class="sticker-grid">
-            <button
-              v-for="sticker in stickerNumbers"
-              :key="`register-offers-${sticker}`"
-              type="button"
-              class="sticker-tile"
-              :class="{ selected: isStickerSelected(registerForm, 'offers', sticker) }"
-              @click="toggleSticker(registerForm, 'offers', sticker)"
-            >{{ sticker }}</button>
+          <div class="sticker-groups">
+            <div v-for="group in STICKER_GROUPS" :key="group.label" class="sticker-group">
+              <p class="sticker-group-label">{{ group.label }}</p>
+              <div class="sticker-grid">
+                <button
+                  v-for="sticker in group.codes"
+                  :key="`register-offers-${sticker}`"
+                  type="button"
+                  class="sticker-tile"
+                  :class="{ selected: isStickerSelected(registerForm, 'offers', sticker) }"
+                  @click="toggleSticker(registerForm, 'offers', sticker)"
+                >{{ sticker }}</button>
+              </div>
+            </div>
           </div>
         </details>
 
@@ -334,15 +345,20 @@ async function submitResetPassword() {
             <button type="button" class="secondary" @click="selectAllCollectedStickers">{{ t('selectAll') }}</button>
             <button type="button" class="secondary" @click="clearAllCollectedStickers">{{ t('deselectAll') }}</button>
           </div>
-          <div class="sticker-grid">
-            <button
-              v-for="sticker in stickerNumbers"
-              :key="`profile-needs-${sticker}`"
-              type="button"
-              class="sticker-tile"
-              :class="{ selected: isProfileStickerCollected(sticker) }"
-              @click="toggleProfileCollectedSticker(sticker)"
-            >{{ sticker }}</button>
+          <div class="sticker-groups">
+            <div v-for="group in STICKER_GROUPS" :key="group.label" class="sticker-group">
+              <p class="sticker-group-label">{{ group.label }}</p>
+              <div class="sticker-grid">
+                <button
+                  v-for="sticker in group.codes"
+                  :key="`profile-needs-${sticker}`"
+                  type="button"
+                  class="sticker-tile"
+                  :class="{ selected: isProfileStickerCollected(sticker) }"
+                  @click="toggleProfileCollectedSticker(sticker)"
+                >{{ sticker }}</button>
+              </div>
+            </div>
           </div>
         </details>
 
@@ -352,15 +368,20 @@ async function submitResetPassword() {
             <button type="button" class="secondary" @click="selectAllStickers(profileForm, 'offers')">{{ t('selectAll') }}</button>
             <button type="button" class="secondary" @click="clearAllStickers(profileForm, 'offers')">{{ t('deselectAll') }}</button>
           </div>
-          <div class="sticker-grid">
-            <button
-              v-for="sticker in stickerNumbers"
-              :key="`profile-offers-${sticker}`"
-              type="button"
-              class="sticker-tile"
-              :class="{ selected: isStickerSelected(profileForm, 'offers', sticker) }"
-              @click="toggleSticker(profileForm, 'offers', sticker)"
-            >{{ sticker }}</button>
+          <div class="sticker-groups">
+            <div v-for="group in STICKER_GROUPS" :key="group.label" class="sticker-group">
+              <p class="sticker-group-label">{{ group.label }}</p>
+              <div class="sticker-grid">
+                <button
+                  v-for="sticker in group.codes"
+                  :key="`profile-offers-${sticker}`"
+                  type="button"
+                  class="sticker-tile"
+                  :class="{ selected: isStickerSelected(profileForm, 'offers', sticker) }"
+                  @click="toggleSticker(profileForm, 'offers', sticker)"
+                >{{ sticker }}</button>
+              </div>
+            </div>
           </div>
         </details>
 

@@ -22,7 +22,16 @@
       "Bash(git push:*)",
       "Bash(npm install:*)",
       "Bash(cd C:/git/stickermania && npm run build 2>&1)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "WebFetch(domain:www.checklistinsider.com)",
+      "WebFetch(domain:football-sticker-album.fandom.com)",
+      "WebFetch(domain:www.panini.co.uk)",
+      "WebFetch(domain:fiestasconideas.com.ar)",
+      "WebFetch(domain:www.diamondcardsonline.com)",
+      "WebFetch(domain:www.soccerphile.com)",
+      "WebFetch(domain:www.fourfourtwo.com)",
+      "WebFetch(domain:www.fwclive.com)",
+      "WebFetch(domain:cartophilic-info-exch.blogspot.com)"
     ]
   }
 }

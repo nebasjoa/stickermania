@@ -1,5 +1,10 @@
 import { computed, reactive, ref } from 'vue';
 import api from './api.js';
+import { STICKER_CODES, STICKER_INDEX } from './data/stickers.js';
+
+function byStickerOrder(a, b) {
+  return (STICKER_INDEX.get(a) ?? Infinity) - (STICKER_INDEX.get(b) ?? Infinity);
+}
 
 // ── State ─────────────────────────────────────────────────────────────────────
 export const currentUser = ref(null);
@@ -25,7 +30,7 @@ export const verificationToken = ref('');
 
 export const registerForm = reactive({
   username: '', email: '', password: '', country: '', city: '',
-  postalTradeEnabled: true, needs: [], offers: []
+  postalTradeEnabled: true, needs: [...STICKER_CODES], offers: []
 });
 
 export const loginForm = reactive({ email: '', password: '' });
@@ -70,14 +75,14 @@ export function syncProfileForm(user) {
   profileForm.country = user?.country || '';
   profileForm.city = user?.city || '';
   profileForm.postalTradeEnabled = Boolean(user?.postalTradeEnabled);
-  profileForm.needs = [...(user?.needs || [])];
-  profileForm.offers = [...(user?.offers || [])];
+  profileForm.needs = [...(user?.needs || [])].sort(byStickerOrder);
+  profileForm.offers = [...(user?.offers || [])].sort(byStickerOrder);
 }
 
 export function resetRegisterForm() {
   Object.assign(registerForm, {
     username: '', email: '', password: '', country: '', city: '',
-    postalTradeEnabled: true, needs: [], offers: []
+    postalTradeEnabled: true, needs: [...STICKER_CODES], offers: []
   });
 }
 
@@ -131,8 +136,13 @@ export function getTradeApprovalDraft(tradeId) {
 export async function fetchMe() {
   try {
     const { data } = await api.get('/auth/me');
-    currentUser.value = data.user;
-    syncProfileForm(data.user);
+    const user = data.user;
+    if (user) {
+      user.needs = [...(user.needs || [])].sort(byStickerOrder);
+      user.offers = [...(user.offers || [])].sort(byStickerOrder);
+    }
+    currentUser.value = user;
+    syncProfileForm(user);
   } catch {
     currentUser.value = null;
   } finally {

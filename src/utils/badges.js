@@ -1,4 +1,5 @@
-const TOTAL_STICKERS = 980;
+import { STICKER_CODES } from '../data/stickers.js';
+const TOTAL_STICKERS = STICKER_CODES.length;
 const TOURNAMENT_START = new Date('2026-06-11');
 
 export const BADGE_CATEGORIES = ['collection', 'trading', 'community', 'predictions', 'account'];
