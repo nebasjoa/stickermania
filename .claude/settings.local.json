@@ -31,7 +31,9 @@
       "WebFetch(domain:www.soccerphile.com)",
       "WebFetch(domain:www.fourfourtwo.com)",
       "WebFetch(domain:www.fwclive.com)",
-      "WebFetch(domain:cartophilic-info-exch.blogspot.com)"
+      "WebFetch(domain:cartophilic-info-exch.blogspot.com)",
+      "WebFetch(domain:www.toffeeweb.com)",
+      "WebFetch(domain:fwclive.com)"
     ]
   }
 }

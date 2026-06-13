@@ -1,5 +1,5 @@
-// All 72 FIFA World Cup 2026 group stage fixtures.
-// Kickoff times stored in UTC (source times were EDT = UTC-4).
+// All 72 FIFA World Cup 2026 group stage fixtures + knockout stage.
+// Kickoff times stored in UTC (source times were BST = UTC+1).
 export const games = [
   // ── Group A: Mexico · South Africa · Korea Republic · Czechia ───────────
   { matchNumber: 1,  group: 'A', homeTeam: 'Mexico',           awayTeam: 'South Africa',    startsAt: '2026-06-11T19:00:00Z', venue: 'Estadio Azteca',           city: 'Mexico City' },
@@ -21,14 +21,14 @@ export const games = [
   { matchNumber: 5,  group: 'C', homeTeam: 'Brazil',           awayTeam: 'Morocco',         startsAt: '2026-06-13T22:00:00Z', venue: 'MetLife Stadium',          city: 'East Rutherford' },
   { matchNumber: 6,  group: 'C', homeTeam: 'Haiti',            awayTeam: 'Scotland',        startsAt: '2026-06-14T01:00:00Z', venue: 'Gillette Stadium',         city: 'Foxborough' },
   { matchNumber: 23, group: 'C', homeTeam: 'Scotland',         awayTeam: 'Morocco',         startsAt: '2026-06-19T22:00:00Z', venue: 'Gillette Stadium',         city: 'Foxborough' },
-  { matchNumber: 24, group: 'C', homeTeam: 'Brazil',           awayTeam: 'Haiti',           startsAt: '2026-06-20T01:00:00Z', venue: 'Lincoln Financial Field',  city: 'Philadelphia' },
+  { matchNumber: 24, group: 'C', homeTeam: 'Brazil',           awayTeam: 'Haiti',           startsAt: '2026-06-20T00:30:00Z', venue: 'Lincoln Financial Field',  city: 'Philadelphia' },
   { matchNumber: 41, group: 'C', homeTeam: 'Scotland',         awayTeam: 'Brazil',          startsAt: '2026-06-24T22:00:00Z', venue: 'Hard Rock Stadium',        city: 'Miami' },
   { matchNumber: 42, group: 'C', homeTeam: 'Morocco',          awayTeam: 'Haiti',           startsAt: '2026-06-24T22:00:00Z', venue: 'Mercedes-Benz Stadium',    city: 'Atlanta' },
 
   // ── Group D: United States · Paraguay · Australia · Türkiye ─────────────
   { matchNumber: 7,  group: 'D', homeTeam: 'United States',    awayTeam: 'Paraguay',        startsAt: '2026-06-13T01:00:00Z', venue: 'SoFi Stadium',             city: 'Inglewood' },
-  { matchNumber: 8,  group: 'D', homeTeam: 'Australia',        awayTeam: 'Türkiye',         startsAt: '2026-06-13T04:00:00Z', venue: 'BC Place',                 city: 'Vancouver' },
-  { matchNumber: 25, group: 'D', homeTeam: 'Türkiye',          awayTeam: 'Paraguay',        startsAt: '2026-06-19T04:00:00Z', venue: "Levi's Stadium",           city: 'Santa Clara' },
+  { matchNumber: 8,  group: 'D', homeTeam: 'Australia',        awayTeam: 'Türkiye',         startsAt: '2026-06-14T04:00:00Z', venue: 'BC Place',                 city: 'Vancouver' },
+  { matchNumber: 25, group: 'D', homeTeam: 'Türkiye',          awayTeam: 'Paraguay',        startsAt: '2026-06-20T03:00:00Z', venue: "Levi's Stadium",           city: 'Santa Clara' },
   { matchNumber: 26, group: 'D', homeTeam: 'United States',    awayTeam: 'Australia',       startsAt: '2026-06-19T19:00:00Z', venue: 'Lumen Field',              city: 'Seattle' },
   { matchNumber: 43, group: 'D', homeTeam: 'Türkiye',          awayTeam: 'United States',   startsAt: '2026-06-26T02:00:00Z', venue: 'SoFi Stadium',             city: 'Inglewood' },
   { matchNumber: 44, group: 'D', homeTeam: 'Paraguay',         awayTeam: 'Australia',       startsAt: '2026-06-26T02:00:00Z', venue: "Levi's Stadium",           city: 'Santa Clara' },
@@ -45,7 +45,7 @@ export const games = [
   { matchNumber: 11, group: 'F', homeTeam: 'Netherlands',      awayTeam: 'Japan',           startsAt: '2026-06-14T20:00:00Z', venue: 'AT&T Stadium',             city: 'Arlington' },
   { matchNumber: 12, group: 'F', homeTeam: 'Sweden',           awayTeam: 'Tunisia',         startsAt: '2026-06-15T02:00:00Z', venue: 'Estadio BBVA',             city: 'Monterrey' },
   { matchNumber: 29, group: 'F', homeTeam: 'Netherlands',      awayTeam: 'Sweden',          startsAt: '2026-06-20T17:00:00Z', venue: 'NRG Stadium',              city: 'Houston' },
-  { matchNumber: 30, group: 'F', homeTeam: 'Tunisia',          awayTeam: 'Japan',           startsAt: '2026-06-20T04:00:00Z', venue: 'Estadio BBVA',             city: 'Monterrey' },
+  { matchNumber: 30, group: 'F', homeTeam: 'Tunisia',          awayTeam: 'Japan',           startsAt: '2026-06-21T04:00:00Z', venue: 'Estadio BBVA',             city: 'Monterrey' },
   { matchNumber: 47, group: 'F', homeTeam: 'Japan',            awayTeam: 'Sweden',          startsAt: '2026-06-25T23:00:00Z', venue: 'AT&T Stadium',             city: 'Arlington' },
   { matchNumber: 48, group: 'F', homeTeam: 'Tunisia',          awayTeam: 'Netherlands',     startsAt: '2026-06-25T23:00:00Z', venue: 'Arrowhead Stadium',        city: 'Kansas City' },
 
@@ -75,7 +75,7 @@ export const games = [
 
   // ── Group J: Argentina · Algeria · Austria · Jordan ──────────────────────
   { matchNumber: 55, group: 'J', homeTeam: 'Argentina',        awayTeam: 'Algeria',         startsAt: '2026-06-17T01:00:00Z', venue: 'Arrowhead Stadium',        city: 'Kansas City' },
-  { matchNumber: 56, group: 'J', homeTeam: 'Austria',          awayTeam: 'Jordan',          startsAt: '2026-06-16T04:00:00Z', venue: "Levi's Stadium",           city: 'Santa Clara' },
+  { matchNumber: 56, group: 'J', homeTeam: 'Austria',          awayTeam: 'Jordan',          startsAt: '2026-06-17T04:00:00Z', venue: "Levi's Stadium",           city: 'Santa Clara' },
   { matchNumber: 57, group: 'J', homeTeam: 'Argentina',        awayTeam: 'Austria',         startsAt: '2026-06-22T17:00:00Z', venue: 'AT&T Stadium',             city: 'Arlington' },
   { matchNumber: 58, group: 'J', homeTeam: 'Jordan',           awayTeam: 'Algeria',         startsAt: '2026-06-23T03:00:00Z', venue: "Levi's Stadium",           city: 'Santa Clara' },
   { matchNumber: 59, group: 'J', homeTeam: 'Jordan',           awayTeam: 'Argentina',       startsAt: '2026-06-28T02:00:00Z', venue: 'AT&T Stadium',             city: 'Arlington' },
@@ -98,45 +98,45 @@ export const games = [
   { matchNumber: 72, group: 'L', homeTeam: 'Croatia',          awayTeam: 'Ghana',           startsAt: '2026-06-27T21:00:00Z', venue: 'Lincoln Financial Field',  city: 'Philadelphia' },
 
   // ── Round of 32 ───────────────────────────────────────────────────────────
-  { matchNumber: 73,  group: '-', stage: 'r32', homeTeam: '1st Group A',          awayTeam: 'Runner-up Group B',    startsAt: '2026-06-28T19:00:00Z', venue: 'MetLife Stadium',          city: 'East Rutherford' },
-  { matchNumber: 74,  group: '-', stage: 'r32', homeTeam: '1st Group C',          awayTeam: 'Runner-up Group D',    startsAt: '2026-06-28T23:00:00Z', venue: 'AT&T Stadium',             city: 'Arlington' },
-  { matchNumber: 75,  group: '-', stage: 'r32', homeTeam: 'Runner-up Group A',    awayTeam: '1st Group B',          startsAt: '2026-06-29T19:00:00Z', venue: 'SoFi Stadium',             city: 'Inglewood' },
-  { matchNumber: 76,  group: '-', stage: 'r32', homeTeam: 'Runner-up Group C',    awayTeam: '1st Group D',          startsAt: '2026-06-29T23:00:00Z', venue: 'NRG Stadium',              city: 'Houston' },
-  { matchNumber: 77,  group: '-', stage: 'r32', homeTeam: '1st Group E',          awayTeam: 'Runner-up Group F',    startsAt: '2026-06-30T19:00:00Z', venue: 'Hard Rock Stadium',        city: 'Miami' },
-  { matchNumber: 78,  group: '-', stage: 'r32', homeTeam: '1st Group G',          awayTeam: 'Runner-up Group H',    startsAt: '2026-06-30T23:00:00Z', venue: 'Mercedes-Benz Stadium',    city: 'Atlanta' },
-  { matchNumber: 79,  group: '-', stage: 'r32', homeTeam: 'Runner-up Group E',    awayTeam: '1st Group F',          startsAt: '2026-07-01T19:00:00Z', venue: 'Lumen Field',              city: 'Seattle' },
-  { matchNumber: 80,  group: '-', stage: 'r32', homeTeam: 'Runner-up Group G',    awayTeam: '1st Group H',          startsAt: '2026-07-01T23:00:00Z', venue: 'BC Place',                 city: 'Vancouver' },
-  { matchNumber: 81,  group: '-', stage: 'r32', homeTeam: '1st Group I',          awayTeam: 'Runner-up Group J',    startsAt: '2026-07-02T19:00:00Z', venue: 'Lincoln Financial Field',  city: 'Philadelphia' },
-  { matchNumber: 82,  group: '-', stage: 'r32', homeTeam: '1st Group K',          awayTeam: 'Runner-up Group L',    startsAt: '2026-07-02T23:00:00Z', venue: 'Gillette Stadium',         city: 'Foxborough' },
-  { matchNumber: 83,  group: '-', stage: 'r32', homeTeam: 'Runner-up Group I',    awayTeam: '1st Group J',          startsAt: '2026-07-03T19:00:00Z', venue: 'Arrowhead Stadium',        city: 'Kansas City' },
-  { matchNumber: 84,  group: '-', stage: 'r32', homeTeam: 'Runner-up Group K',    awayTeam: '1st Group L',          startsAt: '2026-07-03T23:00:00Z', venue: 'BMO Field',                city: 'Toronto' },
-  { matchNumber: 85,  group: '-', stage: 'r32', homeTeam: 'Best 3rd (A/B/C)',     awayTeam: 'Best 3rd (D/E/F)',     startsAt: '2026-07-04T01:00:00Z', venue: 'Estadio Azteca',           city: 'Mexico City' },
-  { matchNumber: 86,  group: '-', stage: 'r32', homeTeam: 'Best 3rd (G/H/I)',     awayTeam: 'Best 3rd (J/K/L)',     startsAt: '2026-07-04T05:00:00Z', venue: 'Estadio Akron',            city: 'Guadalajara' },
-  { matchNumber: 87,  group: '-', stage: 'r32', homeTeam: 'Best 3rd Qualifier',   awayTeam: 'Best 3rd Qualifier',   startsAt: '2026-07-04T21:00:00Z', venue: 'Estadio BBVA',             city: 'Monterrey' },
-  { matchNumber: 88,  group: '-', stage: 'r32', homeTeam: 'Best 3rd Qualifier',   awayTeam: 'Best 3rd Qualifier',   startsAt: '2026-07-05T01:00:00Z', venue: 'Estadio Azteca',           city: 'Mexico City' },
+  { matchNumber: 73,  group: '-', stage: 'r32', homeTeam: 'Runner-up Group A',    awayTeam: 'Runner-up Group B',    startsAt: '2026-06-28T19:00:00Z', venue: 'SoFi Stadium',             city: 'Inglewood' },
+  { matchNumber: 74,  group: '-', stage: 'r32', homeTeam: 'Winner Group E',       awayTeam: 'Best 3rd Place',       startsAt: '2026-06-29T20:30:00Z', venue: 'Gillette Stadium',         city: 'Foxborough' },
+  { matchNumber: 75,  group: '-', stage: 'r32', homeTeam: 'Winner Group F',       awayTeam: 'Runner-up Group C',    startsAt: '2026-06-30T01:00:00Z', venue: 'Estadio Akron',            city: 'Guadalajara' },
+  { matchNumber: 76,  group: '-', stage: 'r32', homeTeam: 'Winner Group C',       awayTeam: 'Runner-up Group F',    startsAt: '2026-06-29T17:00:00Z', venue: 'NRG Stadium',              city: 'Houston' },
+  { matchNumber: 77,  group: '-', stage: 'r32', homeTeam: 'Winner Group I',       awayTeam: 'Best 3rd Place',       startsAt: '2026-06-30T21:00:00Z', venue: 'MetLife Stadium',          city: 'East Rutherford' },
+  { matchNumber: 78,  group: '-', stage: 'r32', homeTeam: 'Runner-up Group E',    awayTeam: 'Runner-up Group I',    startsAt: '2026-06-30T17:00:00Z', venue: 'AT&T Stadium',             city: 'Arlington' },
+  { matchNumber: 79,  group: '-', stage: 'r32', homeTeam: 'Winner Group A',       awayTeam: 'Best 3rd Place',       startsAt: '2026-07-01T01:00:00Z', venue: 'Estadio Azteca',           city: 'Mexico City' },
+  { matchNumber: 80,  group: '-', stage: 'r32', homeTeam: 'Winner Group L',       awayTeam: 'Best 3rd Place',       startsAt: '2026-07-01T16:00:00Z', venue: 'Mercedes-Benz Stadium',    city: 'Atlanta' },
+  { matchNumber: 81,  group: '-', stage: 'r32', homeTeam: 'Winner Group D',       awayTeam: 'Best 3rd Place',       startsAt: '2026-07-02T00:00:00Z', venue: "Levi's Stadium",           city: 'Santa Clara' },
+  { matchNumber: 82,  group: '-', stage: 'r32', homeTeam: 'Winner Group G',       awayTeam: 'Best 3rd Place',       startsAt: '2026-07-01T20:00:00Z', venue: 'Lumen Field',              city: 'Seattle' },
+  { matchNumber: 83,  group: '-', stage: 'r32', homeTeam: 'Runner-up Group K',    awayTeam: 'Runner-up Group L',    startsAt: '2026-07-02T23:00:00Z', venue: 'BMO Field',                city: 'Toronto' },
+  { matchNumber: 84,  group: '-', stage: 'r32', homeTeam: 'Winner Group H',       awayTeam: 'Runner-up Group J',    startsAt: '2026-07-02T19:00:00Z', venue: 'SoFi Stadium',             city: 'Inglewood' },
+  { matchNumber: 85,  group: '-', stage: 'r32', homeTeam: 'Winner Group B',       awayTeam: 'Best 3rd Place',       startsAt: '2026-07-03T03:00:00Z', venue: 'BC Place',                 city: 'Vancouver' },
+  { matchNumber: 86,  group: '-', stage: 'r32', homeTeam: 'Winner Group J',       awayTeam: 'Runner-up Group H',    startsAt: '2026-07-03T22:00:00Z', venue: 'Hard Rock Stadium',        city: 'Miami' },
+  { matchNumber: 87,  group: '-', stage: 'r32', homeTeam: 'Winner Group K',       awayTeam: 'Best 3rd Place',       startsAt: '2026-07-04T01:30:00Z', venue: 'Arrowhead Stadium',        city: 'Kansas City' },
+  { matchNumber: 88,  group: '-', stage: 'r32', homeTeam: 'Runner-up Group D',    awayTeam: 'Runner-up Group G',    startsAt: '2026-07-03T18:00:00Z', venue: 'AT&T Stadium',             city: 'Arlington' },
 
   // ── Round of 16 ───────────────────────────────────────────────────────────
-  { matchNumber: 89,  group: '-', stage: 'r16', homeTeam: 'Winner Match 73',      awayTeam: 'Winner Match 74',      startsAt: '2026-07-05T19:00:00Z', venue: 'MetLife Stadium',          city: 'East Rutherford' },
-  { matchNumber: 90,  group: '-', stage: 'r16', homeTeam: 'Winner Match 75',      awayTeam: 'Winner Match 76',      startsAt: '2026-07-05T23:00:00Z', venue: 'AT&T Stadium',             city: 'Arlington' },
-  { matchNumber: 91,  group: '-', stage: 'r16', homeTeam: 'Winner Match 77',      awayTeam: 'Winner Match 78',      startsAt: '2026-07-06T19:00:00Z', venue: 'SoFi Stadium',             city: 'Inglewood' },
-  { matchNumber: 92,  group: '-', stage: 'r16', homeTeam: 'Winner Match 79',      awayTeam: 'Winner Match 80',      startsAt: '2026-07-06T23:00:00Z', venue: 'NRG Stadium',              city: 'Houston' },
-  { matchNumber: 93,  group: '-', stage: 'r16', homeTeam: 'Winner Match 81',      awayTeam: 'Winner Match 82',      startsAt: '2026-07-07T19:00:00Z', venue: 'Hard Rock Stadium',        city: 'Miami' },
-  { matchNumber: 94,  group: '-', stage: 'r16', homeTeam: 'Winner Match 83',      awayTeam: 'Winner Match 84',      startsAt: '2026-07-07T23:00:00Z', venue: 'Mercedes-Benz Stadium',    city: 'Atlanta' },
-  { matchNumber: 95,  group: '-', stage: 'r16', homeTeam: 'Winner Match 85',      awayTeam: 'Winner Match 86',      startsAt: '2026-07-08T19:00:00Z', venue: 'Lumen Field',              city: 'Seattle' },
-  { matchNumber: 96,  group: '-', stage: 'r16', homeTeam: 'Winner Match 87',      awayTeam: 'Winner Match 88',      startsAt: '2026-07-08T23:00:00Z', venue: 'BC Place',                 city: 'Vancouver' },
+  { matchNumber: 89,  group: '-', stage: 'r16', homeTeam: 'Winner Match 74',      awayTeam: 'Winner Match 77',      startsAt: '2026-07-04T21:00:00Z', venue: 'Lincoln Financial Field',  city: 'Philadelphia' },
+  { matchNumber: 90,  group: '-', stage: 'r16', homeTeam: 'Winner Match 73',      awayTeam: 'Winner Match 75',      startsAt: '2026-07-04T17:00:00Z', venue: 'NRG Stadium',              city: 'Houston' },
+  { matchNumber: 91,  group: '-', stage: 'r16', homeTeam: 'Winner Match 76',      awayTeam: 'Winner Match 78',      startsAt: '2026-07-05T20:00:00Z', venue: 'MetLife Stadium',          city: 'East Rutherford' },
+  { matchNumber: 92,  group: '-', stage: 'r16', homeTeam: 'Winner Match 79',      awayTeam: 'Winner Match 80',      startsAt: '2026-07-06T00:00:00Z', venue: 'Estadio Azteca',           city: 'Mexico City' },
+  { matchNumber: 93,  group: '-', stage: 'r16', homeTeam: 'Winner Match 83',      awayTeam: 'Winner Match 84',      startsAt: '2026-07-06T19:00:00Z', venue: 'AT&T Stadium',             city: 'Arlington' },
+  { matchNumber: 94,  group: '-', stage: 'r16', homeTeam: 'Winner Match 81',      awayTeam: 'Winner Match 82',      startsAt: '2026-07-07T00:00:00Z', venue: 'Lumen Field',              city: 'Seattle' },
+  { matchNumber: 95,  group: '-', stage: 'r16', homeTeam: 'Winner Match 86',      awayTeam: 'Winner Match 88',      startsAt: '2026-07-07T16:00:00Z', venue: 'Mercedes-Benz Stadium',    city: 'Atlanta' },
+  { matchNumber: 96,  group: '-', stage: 'r16', homeTeam: 'Winner Match 85',      awayTeam: 'Winner Match 87',      startsAt: '2026-07-07T20:00:00Z', venue: 'BC Place',                 city: 'Vancouver' },
 
   // ── Quarter-Finals ────────────────────────────────────────────────────────
-  { matchNumber: 97,  group: '-', stage: 'qf',  homeTeam: 'Winner Match 89',      awayTeam: 'Winner Match 90',      startsAt: '2026-07-09T23:00:00Z', venue: 'MetLife Stadium',          city: 'East Rutherford' },
-  { matchNumber: 98,  group: '-', stage: 'qf',  homeTeam: 'Winner Match 91',      awayTeam: 'Winner Match 92',      startsAt: '2026-07-10T23:00:00Z', venue: 'AT&T Stadium',             city: 'Arlington' },
-  { matchNumber: 99,  group: '-', stage: 'qf',  homeTeam: 'Winner Match 93',      awayTeam: 'Winner Match 94',      startsAt: '2026-07-11T19:00:00Z', venue: 'SoFi Stadium',             city: 'Inglewood' },
-  { matchNumber: 100, group: '-', stage: 'qf',  homeTeam: 'Winner Match 95',      awayTeam: 'Winner Match 96',      startsAt: '2026-07-11T23:00:00Z', venue: 'NRG Stadium',              city: 'Houston' },
+  { matchNumber: 97,  group: '-', stage: 'qf',  homeTeam: 'Winner Match 89',      awayTeam: 'Winner Match 90',      startsAt: '2026-07-09T20:00:00Z', venue: 'Gillette Stadium',         city: 'Foxborough' },
+  { matchNumber: 98,  group: '-', stage: 'qf',  homeTeam: 'Winner Match 93',      awayTeam: 'Winner Match 94',      startsAt: '2026-07-10T19:00:00Z', venue: 'SoFi Stadium',             city: 'Inglewood' },
+  { matchNumber: 99,  group: '-', stage: 'qf',  homeTeam: 'Winner Match 91',      awayTeam: 'Winner Match 92',      startsAt: '2026-07-11T21:00:00Z', venue: 'Hard Rock Stadium',        city: 'Miami' },
+  { matchNumber: 100, group: '-', stage: 'qf',  homeTeam: 'Winner Match 95',      awayTeam: 'Winner Match 96',      startsAt: '2026-07-12T01:00:00Z', venue: 'Arrowhead Stadium',        city: 'Kansas City' },
 
   // ── Semi-Finals ───────────────────────────────────────────────────────────
-  { matchNumber: 101, group: '-', stage: 'sf',  homeTeam: 'Winner Match 97',      awayTeam: 'Winner Match 98',      startsAt: '2026-07-14T23:00:00Z', venue: 'MetLife Stadium',          city: 'East Rutherford' },
-  { matchNumber: 102, group: '-', stage: 'sf',  homeTeam: 'Winner Match 99',      awayTeam: 'Winner Match 100',     startsAt: '2026-07-15T23:00:00Z', venue: 'AT&T Stadium',             city: 'Arlington' },
+  { matchNumber: 101, group: '-', stage: 'sf',  homeTeam: 'Winner Match 97',      awayTeam: 'Winner Match 98',      startsAt: '2026-07-14T19:00:00Z', venue: 'AT&T Stadium',             city: 'Arlington' },
+  { matchNumber: 102, group: '-', stage: 'sf',  homeTeam: 'Winner Match 99',      awayTeam: 'Winner Match 100',     startsAt: '2026-07-15T19:00:00Z', venue: 'Mercedes-Benz Stadium',    city: 'Atlanta' },
 
   // ── Third-Place Play-Off ──────────────────────────────────────────────────
-  { matchNumber: 103, group: '-', stage: 'third', homeTeam: 'Loser Match 101',    awayTeam: 'Loser Match 102',      startsAt: '2026-07-18T19:00:00Z', venue: 'Hard Rock Stadium',        city: 'Miami' },
+  { matchNumber: 103, group: '-', stage: 'third', homeTeam: 'Loser Match 101',    awayTeam: 'Loser Match 102',      startsAt: '2026-07-18T21:00:00Z', venue: 'Hard Rock Stadium',        city: 'Miami' },
 
   // ── Final ─────────────────────────────────────────────────────────────────
   { matchNumber: 104, group: '-', stage: 'final', homeTeam: 'Winner Match 101',   awayTeam: 'Winner Match 102',     startsAt: '2026-07-19T19:00:00Z', venue: 'MetLife Stadium',          city: 'East Rutherford' },
