@@ -33,7 +33,27 @@
       "WebFetch(domain:www.fwclive.com)",
       "WebFetch(domain:cartophilic-info-exch.blogspot.com)",
       "WebFetch(domain:www.toffeeweb.com)",
-      "WebFetch(domain:fwclive.com)"
+      "WebFetch(domain:fwclive.com)",
+      "Bash(sleep 2 && cat /tmp/vite.log)",
+      "Read(//tmp/**)",
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(npx --version)",
+      "Bash(sleep 3 && cat /tmp/server.log)",
+      "Bash(npm ls *)",
+      "Bash(npx -y chromium-cli --version)",
+      "Bash(npx playwright *)",
+      "Read(//c//**)",
+      "Bash(node test-search.mjs)",
+      "Bash(npm root *)",
+      "Bash(NODE_PATH=\"/c/Users/neboj/AppData/Local/npm-cache/_npx/e41f203b7505f1fb/node_modules\" node test-search.mjs)",
+      "Bash(git status *)",
+      "Bash(npm run *)",
+      "Bash(which mysql *)",
+      "Bash(mysql -h127.0.0.1 -P3306 -uroot -p123456 stickermania -e \"SELECT id, username, email, is_admin FROM users WHERE is_admin=1 LIMIT 3;\")",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/register -H \"Content-Type: application/json\" -d '{\"username\":\"_tmp_admin_test\",\"email\":\"tmp-admin-test@example.com\",\"password\":\"TempPass123!\"}')",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/verify-email -H \"Content-Type: application/json\" -d '{\"token\":\"0a21f0c9c8b15944603092a798677f1f184f5020d2ac6648\"}')",
+      "Bash(node test-admin-search.mjs)"
     ]
   }
 }

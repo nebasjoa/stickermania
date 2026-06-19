@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import CountryLabel from '../components/CountryLabel.vue';
 import {
@@ -7,7 +7,9 @@ import {
   activePredictionGroup, activeKnockoutStage, savePrediction
 } from '../store.js';
 
-const { t } = useI18n();
+const { t, te } = useI18n();
+
+const countrySearch = ref('');
 
 const PREDICTION_GROUPS = ['A','B','C','D','E','F','G','H','I','J','K','L'];
 const KNOCKOUT_STAGES = computed(() => [
@@ -38,6 +40,26 @@ const knockoutByStage = computed(() => {
   }
   return stages;
 });
+
+function teamMatchesCountrySearch(teamCode, query) {
+  const code = String(teamCode || '');
+  const translated = te(`countries.${code}`) ? t(`countries.${code}`) : '';
+  return code.toLowerCase().includes(query) || translated.toLowerCase().includes(query);
+}
+
+function gameMatchesCountrySearch(game) {
+  const query = countrySearch.value.trim().toLowerCase();
+  if (!query) return true;
+  return teamMatchesCountrySearch(game.homeTeam, query) || teamMatchesCountrySearch(game.awayTeam, query);
+}
+
+const visibleGroupGames = computed(() =>
+  (gamesByGroup.value[activePredictionGroup.value] || []).filter(gameMatchesCountrySearch)
+);
+
+const visibleKnockoutGames = computed(() =>
+  (knockoutByStage.value[activeKnockoutStage.value] || []).filter(gameMatchesCountrySearch)
+);
 
 const scoredPredictions = computed(() =>
   predictions.value.filter((game) => game.prediction?.points != null)
@@ -200,9 +222,20 @@ function knockoutActualSummary(game) {
       </ul>
     </article>
 
+    <article class="card country-search-card">
+      <label for="country-search" class="country-search-label">{{ t('predCountrySearchLabel') }}</label>
+      <input
+        id="country-search"
+        v-model="countrySearch"
+        type="text"
+        class="country-search-input"
+        :placeholder="t('predCountrySearchPlaceholder')"
+      />
+    </article>
+
     <div v-if="activePredictionGroup !== 'KO'" class="prediction-list">
       <article
-        v-for="game in (gamesByGroup[activePredictionGroup] || [])"
+        v-for="game in visibleGroupGames"
         :key="game.id"
         class="card prediction-game"
         :class="{ locked: isGameLocked(game) }"
@@ -252,8 +285,9 @@ function knockoutActualSummary(game) {
         </div>
       </article>
 
-      <article v-if="!(gamesByGroup[activePredictionGroup] || []).length" class="card">
-        <p>{{ t('predNoGamesGroup', { group: activePredictionGroup }) }}</p>
+      <article v-if="!visibleGroupGames.length" class="card">
+        <p v-if="countrySearch.trim()">{{ t('predNoGamesSearch', { query: countrySearch.trim() }) }}</p>
+        <p v-else>{{ t('predNoGamesGroup', { group: activePredictionGroup }) }}</p>
       </article>
     </div>
 
@@ -277,7 +311,7 @@ function knockoutActualSummary(game) {
         <template v-if="activeKnockoutStage === stage.key">
           <h3 class="knockout-stage-header">{{ stage.label }}</h3>
           <article
-            v-for="game in (knockoutByStage[stage.key] || [])"
+            v-for="game in visibleKnockoutGames"
             :key="game.id"
             class="card prediction-game"
             :class="{ locked: isGameLocked(game) }"
@@ -391,8 +425,9 @@ function knockoutActualSummary(game) {
             </div>
           </article>
 
-          <article v-if="!(knockoutByStage[stage.key] || []).length" class="card">
-            <p>{{ t('predNoGamesStage') }}</p>
+          <article v-if="!visibleKnockoutGames.length" class="card">
+            <p v-if="countrySearch.trim()">{{ t('predNoGamesSearch', { query: countrySearch.trim() }) }}</p>
+            <p v-else>{{ t('predNoGamesStage') }}</p>
           </article>
         </template>
       </template>

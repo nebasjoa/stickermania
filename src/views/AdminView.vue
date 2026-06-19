@@ -1,7 +1,12 @@
 <script setup>
-import { computed, reactive } from 'vue';
+import { computed, reactive, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import CountryLabel from '../components/CountryLabel.vue';
 import { predictions, loading, saveResult } from '../store.js';
+
+const { t, te } = useI18n();
+
+const countrySearch = ref('');
 
 const KNOCKOUT_STAGES = [
   { key: 'r32', label: 'Round of 32' },
@@ -30,6 +35,28 @@ const knockoutGames = computed(() => {
     stages[game.stage].push(game);
   }
   return stages;
+});
+
+function teamMatchesCountrySearch(teamCode, query) {
+  const code = String(teamCode || '');
+  const translated = te(`countries.${code}`) ? t(`countries.${code}`) : '';
+  return code.toLowerCase().includes(query) || translated.toLowerCase().includes(query);
+}
+
+function gameMatchesCountrySearch(game) {
+  const query = countrySearch.value.trim().toLowerCase();
+  if (!query) return true;
+  return teamMatchesCountrySearch(game.homeTeam, query) || teamMatchesCountrySearch(game.awayTeam, query);
+}
+
+function filteredGames(games) {
+  return games.filter(gameMatchesCountrySearch);
+}
+
+const hasVisibleResults = computed(() => {
+  const groupsHaveGames = Object.values(groupGames.value).some((games) => filteredGames(games).length);
+  const knockoutHaveGames = KNOCKOUT_STAGES.some((stage) => filteredGames(knockoutGames.value[stage.key] || []).length);
+  return groupsHaveGames || knockoutHaveGames;
 });
 
 // Local drafts for result inputs, keyed by game id
@@ -120,13 +147,27 @@ async function submitResult(game) {
     <article class="card">
       <h2>Admin - Enter Match Results</h2>
       <p class="card-intro">Set the final score for each game. Points are automatically awarded to all predictions.</p>
+      <div class="country-search-card">
+        <label for="admin-country-search" class="country-search-label">Search by country</label>
+        <input
+          id="admin-country-search"
+          v-model="countrySearch"
+          type="text"
+          class="country-search-input"
+          placeholder="Type a country name..."
+        />
+      </div>
+    </article>
+
+    <article v-if="countrySearch.trim() && !hasVisibleResults" class="card">
+      <p>No games found for "{{ countrySearch.trim() }}".</p>
     </article>
 
     <template v-for="(games, group) in groupGames" :key="group">
-      <article class="card">
+      <article v-if="filteredGames(games).length" class="card">
         <h2>Group {{ group }}</h2>
         <div class="admin-games">
-          <article v-for="game in games" :key="game.id" class="admin-game-row">
+          <article v-for="game in filteredGames(games)" :key="game.id" class="admin-game-row">
             <div class="admin-game-info">
               <span class="admin-game-num">Match {{ game.matchNumber }}</span>
               <div class="admin-game-meta">
@@ -175,10 +216,10 @@ async function submitResult(game) {
     </template>
 
     <template v-for="stage in KNOCKOUT_STAGES" :key="stage.key">
-      <article v-if="(knockoutGames[stage.key] || []).length" class="card">
+      <article v-if="filteredGames(knockoutGames[stage.key] || []).length" class="card">
         <h2>{{ stage.label }}</h2>
         <div class="admin-games">
-          <article v-for="game in knockoutGames[stage.key]" :key="game.id" class="admin-game-row">
+          <article v-for="game in filteredGames(knockoutGames[stage.key] || [])" :key="game.id" class="admin-game-row">
             <div class="admin-game-info">
               <span class="admin-game-num">Match {{ game.matchNumber }}</span>
               <div class="admin-game-meta">
