@@ -2019,6 +2019,44 @@ button.danger:hover:not(:disabled) {
   max-width: 320px;
 }
 
+.country-flag-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.country-flag-btn {
+  width: auto;
+  padding: 0.3rem 0.4rem;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s ease, transform 0.1s ease, background 0.15s ease;
+}
+
+.country-flag-btn:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.country-flag-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
+}
+
+.country-flag-icon {
+  width: 1.5em;
+  height: auto;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
 .prediction-points-item {
   display: grid;
   gap: 0.25rem;

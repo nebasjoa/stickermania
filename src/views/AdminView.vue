@@ -2,11 +2,25 @@
 import { computed, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import CountryLabel from '../components/CountryLabel.vue';
+import { getCountryFlagCode, hasCountryFlag } from '../utils/countryFlags.js';
 import { predictions, loading, saveResult } from '../store.js';
 
 const { t, te } = useI18n();
 
 const countrySearch = ref('');
+
+const availableCountries = computed(() => {
+  const set = new Set();
+  for (const game of predictions.value) {
+    if (hasCountryFlag(game.homeTeam)) set.add(game.homeTeam);
+    if (hasCountryFlag(game.awayTeam)) set.add(game.awayTeam);
+  }
+  return Array.from(set).sort((a, b) => a.localeCompare(b));
+});
+
+function toggleCountryFilter(country) {
+  countrySearch.value = countrySearch.value.trim().toLowerCase() === country.toLowerCase() ? '' : country;
+}
 
 const KNOCKOUT_STAGES = [
   { key: 'r32', label: 'Round of 32' },
@@ -156,6 +170,19 @@ async function submitResult(game) {
           class="country-search-input"
           placeholder="Type a country name..."
         />
+        <div class="country-flag-grid">
+          <button
+            v-for="country in availableCountries"
+            :key="country"
+            type="button"
+            class="country-flag-btn"
+            :class="{ active: countrySearch.trim().toLowerCase() === country.toLowerCase() }"
+            :title="country"
+            @click="toggleCountryFilter(country)"
+          >
+            <span :class="`fi fi-${getCountryFlagCode(country)}`" class="country-flag-icon" aria-hidden="true"></span>
+          </button>
+        </div>
       </div>
     </article>
 
