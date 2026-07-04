@@ -2304,14 +2304,20 @@ button.danger:hover:not(:disabled) {
 }
 
 .admin-game-date,
-.admin-game-venue {
+.admin-game-venue,
+.admin-my-pick {
   font-size: 0.85rem;
   color: var(--text-muted);
 }
 
-.admin-game-venue {
+.admin-game-venue,
+.admin-my-pick {
   padding-left: 0.55rem;
   border-left: 1px solid var(--border);
+}
+
+.admin-my-pick {
+  font-style: italic;
 }
 
 .admin-game-result {

@@ -91,6 +91,15 @@ function getResultDraft(game) {
   return resultDrafts[game.id];
 }
 
+function formatMyPrediction(game) {
+  const p = game.prediction;
+  if (!p) return null;
+  let text = `${p.homeScore}:${p.awayScore}`;
+  if (p.extraTimePlayed && p.extraHomeScore != null) text += ` · ET ${p.extraHomeScore}:${p.extraAwayScore}`;
+  if (p.penaltiesPlayed && p.penaltiesHomeScore != null) text += ` · pens ${p.penaltiesHomeScore}:${p.penaltiesAwayScore}`;
+  return text;
+}
+
 function formatDate(iso) {
   return new Date(iso).toLocaleString(undefined, {
     weekday: 'short', month: 'short', day: 'numeric',
@@ -200,6 +209,7 @@ async function submitResult(game) {
               <div class="admin-game-meta">
                 <span class="admin-game-date">{{ formatDate(game.startsAt) }}</span>
                 <span class="admin-game-venue">{{ game.city }}</span>
+                <span v-if="game.prediction" class="admin-my-pick">Your pick: {{ formatMyPrediction(game) }}</span>
               </div>
               </div>
 
@@ -252,6 +262,7 @@ async function submitResult(game) {
               <div class="admin-game-meta">
                 <span class="admin-game-date">{{ formatDate(game.startsAt) }}</span>
                 <span class="admin-game-venue">{{ game.city }}</span>
+                <span v-if="game.prediction" class="admin-my-pick">Your pick: {{ formatMyPrediction(game) }}</span>
               </div>
             </div>
 
