@@ -126,9 +126,9 @@ export const games = [
   { matchNumber: 96,  group: '-', stage: 'r16', homeTeam: 'Switzerland',          awayTeam: 'Colombia',             startsAt: '2026-07-07T20:00:00Z', venue: 'BC Place',                 city: 'Vancouver' },
 
   // ── Quarter-Finals ────────────────────────────────────────────────────────
-  { matchNumber: 97,  group: '-', stage: 'qf',  homeTeam: 'Winner Match 89',      awayTeam: 'Winner Match 90',      startsAt: '2026-07-09T20:00:00Z', venue: 'Gillette Stadium',         city: 'Foxborough' },
-  { matchNumber: 98,  group: '-', stage: 'qf',  homeTeam: 'Winner Match 93',      awayTeam: 'Winner Match 94',      startsAt: '2026-07-10T19:00:00Z', venue: 'SoFi Stadium',             city: 'Inglewood' },
-  { matchNumber: 99,  group: '-', stage: 'qf',  homeTeam: 'Winner Match 91',      awayTeam: 'Winner Match 92',      startsAt: '2026-07-11T21:00:00Z', venue: 'Hard Rock Stadium',        city: 'Miami' },
+  { matchNumber: 97,  group: '-', stage: 'qf',  homeTeam: 'France',               awayTeam: 'Morocco',              startsAt: '2026-07-09T20:00:00Z', venue: 'Gillette Stadium',         city: 'Foxborough' },
+  { matchNumber: 98,  group: '-', stage: 'qf',  homeTeam: 'Spain',                awayTeam: 'Belgium',              startsAt: '2026-07-10T19:00:00Z', venue: 'SoFi Stadium',             city: 'Inglewood' },
+  { matchNumber: 99,  group: '-', stage: 'qf',  homeTeam: 'Norway',               awayTeam: 'England',              startsAt: '2026-07-11T21:00:00Z', venue: 'Hard Rock Stadium',        city: 'Miami' },
   { matchNumber: 100, group: '-', stage: 'qf',  homeTeam: 'Winner Match 95',      awayTeam: 'Winner Match 96',      startsAt: '2026-07-12T01:00:00Z', venue: 'Arrowhead Stadium',        city: 'Kansas City' },
 
   // ── Semi-Finals ───────────────────────────────────────────────────────────

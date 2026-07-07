@@ -932,6 +932,7 @@ small {
 .stack {
   display: grid;
   gap: 0.85rem;
+  align-content: start;
 }
 
 .auth-shell {

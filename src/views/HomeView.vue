@@ -467,7 +467,7 @@ onUnmounted(() => {
         <RouterLink to="/search" class="btn secondary">{{ t('navSearch') }}</RouterLink>
       </div>
       <div v-if="!homeRecentCollectors.length" class="home-panel-empty">{{ t('noCollectorsYet') }}</div>
-      <article v-for="collector in homeRecentCollectors" :key="`collector-${collector.id}`" class="home-panel-item">
+      <article v-for="collector in homeRecentCollectors.slice(0, 3)" :key="`collector-${collector.id}`" class="home-panel-item">
         <div class="home-panel-item-top">
           <RouterLink :to="`/profile/${collector.username}`" class="collector-username-link">{{ collector.username }}</RouterLink>
         </div>
